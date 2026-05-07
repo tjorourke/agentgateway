@@ -504,6 +504,9 @@ fn convert_backend_ai_policy(
 					Kind::Webhook(wh) => {
 						llm::policy::RequestGuardKind::Webhook(convert_webhook(wh, diagnostics)?)
 					},
+					Kind::HeaderRedaction(hr) => {
+						llm::policy::RequestGuardKind::HeaderRedaction(convert_header_redaction(hr))
+					},
 					Kind::OpenaiModeration(m) => {
 						let pols = m
 							.inline_policies
@@ -592,6 +595,9 @@ fn convert_backend_ai_policy(
 				},
 				response_guard::Kind::Webhook(wh) => {
 					llm::policy::ResponseGuardKind::Webhook(convert_webhook(wh, diagnostics).ok()?)
+				},
+				response_guard::Kind::HeaderRedaction(hr) => {
+					llm::policy::ResponseGuardKind::HeaderRedaction(convert_header_redaction(hr))
 				},
 				response_guard::Kind::GoogleModelArmor(gma) => {
 					let pols = gma
@@ -2765,6 +2771,25 @@ fn convert_webhook(
 	})
 }
 
+fn convert_header_redaction(
+	hr: &proto::agent::backend_policy_spec::ai::HeaderRedaction,
+) -> llm::policy::HeaderRedaction {
+	let header_prefix = if hr.header_prefix.is_empty() {
+		"x-redact-".to_string()
+	} else {
+		hr.header_prefix.clone()
+	};
+	let token_format = if hr.token_format.is_empty() {
+		"[{NAME}]".to_string()
+	} else {
+		hr.token_format.clone()
+	};
+	llm::policy::HeaderRedaction {
+		header_prefix,
+		token_format,
+	}
+}
+
 fn convert_regex_rules(
 	rr: &proto::agent::backend_policy_spec::ai::RegexRules,
 	diagnostics: &mut Diagnostics,
@@ -3467,6 +3492,98 @@ mod tests {
 		};
 
 		assert_eq!(metrics.add.len(), 0);
+		Ok(())
+	}
+
+	// ----- HeaderRedaction conversion ---------------------------------------
+
+	#[test]
+	fn convert_header_redaction_uses_explicit_values() {
+		let proto_hr = proto::agent::backend_policy_spec::ai::HeaderRedaction {
+			header_prefix: "x-pii-".to_string(),
+			token_format: "<<{NAME}>>".to_string(),
+		};
+		let hr = super::convert_header_redaction(&proto_hr);
+		assert_eq!(hr.header_prefix, "x-pii-");
+		assert_eq!(hr.token_format, "<<{NAME}>>");
+	}
+
+	#[test]
+	fn convert_header_redaction_falls_back_to_defaults_when_empty() {
+		let proto_hr = proto::agent::backend_policy_spec::ai::HeaderRedaction {
+			header_prefix: String::new(),
+			token_format: String::new(),
+		};
+		let hr = super::convert_header_redaction(&proto_hr);
+		assert_eq!(hr.header_prefix, "x-redact-");
+		assert_eq!(hr.token_format, "[{NAME}]");
+	}
+
+	#[test]
+	fn convert_request_guard_with_header_redaction() -> Result<(), ProtoError> {
+		use proto::agent::backend_policy_spec::ai::{
+			HeaderRedaction as ProtoHr, PromptGuard, RequestGuard, request_guard,
+		};
+
+		let ai = Ai {
+			prompt_guard: Some(PromptGuard {
+				request: vec![RequestGuard {
+					rejection: None,
+					kind: Some(request_guard::Kind::HeaderRedaction(ProtoHr {
+						header_prefix: "x-redact-".to_string(),
+						token_format: "[{NAME}]".to_string(),
+					})),
+				}],
+				response: vec![],
+			}),
+			..Default::default()
+		};
+
+		let mut diag = Diagnostics::default();
+		let policy = super::convert_backend_ai_policy(&ai, &mut diag)?;
+		let pg = policy.prompt_guard.expect("prompt_guard set");
+		assert_eq!(pg.request.len(), 1);
+		match &pg.request[0].kind {
+			llm::policy::RequestGuardKind::HeaderRedaction(hr) => {
+				assert_eq!(hr.header_prefix, "x-redact-");
+				assert_eq!(hr.token_format, "[{NAME}]");
+			},
+			other => panic!("expected HeaderRedaction, got {:?}", other),
+		}
+		Ok(())
+	}
+
+	#[test]
+	fn convert_response_guard_with_header_redaction() -> Result<(), ProtoError> {
+		use proto::agent::backend_policy_spec::ai::{
+			HeaderRedaction as ProtoHr, PromptGuard, ResponseGuard, response_guard,
+		};
+
+		let ai = Ai {
+			prompt_guard: Some(PromptGuard {
+				request: vec![],
+				response: vec![ResponseGuard {
+					rejection: None,
+					kind: Some(response_guard::Kind::HeaderRedaction(ProtoHr {
+						header_prefix: "x-pii-".to_string(),
+						token_format: "<{NAME}>".to_string(),
+					})),
+				}],
+			}),
+			..Default::default()
+		};
+
+		let mut diag = Diagnostics::default();
+		let policy = super::convert_backend_ai_policy(&ai, &mut diag)?;
+		let pg = policy.prompt_guard.expect("prompt_guard set");
+		assert_eq!(pg.response.len(), 1);
+		match &pg.response[0].kind {
+			llm::policy::ResponseGuardKind::HeaderRedaction(hr) => {
+				assert_eq!(hr.header_prefix, "x-pii-");
+				assert_eq!(hr.token_format, "<{NAME}>");
+			},
+			other => panic!("expected HeaderRedaction, got {:?}", other),
+		}
 		Ok(())
 	}
 }

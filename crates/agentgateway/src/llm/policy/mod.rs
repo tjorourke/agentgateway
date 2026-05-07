@@ -417,6 +417,27 @@ impl Policy {
 						return Ok(Some(res));
 					}
 				},
+				RequestGuardKind::HeaderRedaction(hr) => {
+					match Self::apply_header_redaction_request(req, hr, http_headers)? {
+						GuardrailOutcome::Masked => {
+							Self::record_guardrail_trip(
+								&client,
+								crate::telemetry::metrics::GuardrailPhase::Request,
+								crate::telemetry::metrics::GuardrailAction::Mask,
+							);
+						},
+						GuardrailOutcome::None => {
+							Self::record_guardrail_trip(
+								&client,
+								crate::telemetry::metrics::GuardrailPhase::Request,
+								crate::telemetry::metrics::GuardrailAction::Allow,
+							);
+						},
+						GuardrailOutcome::Rejected(_) => {
+							unreachable!("header redaction never rejects")
+						},
+					}
+				},
 				RequestGuardKind::OpenAIModeration(m) => {
 					if let Some(res) =
 						Self::apply_moderation(req, claims.clone(), &client, &g.rejection, m).await?
@@ -756,6 +777,56 @@ impl Policy {
 		Ok(GuardrailOutcome::None)
 	}
 
+	fn apply_header_redaction_request(
+		req: &mut dyn RequestType,
+		rules: &HeaderRedaction,
+		http_headers: &HeaderMap,
+	) -> anyhow::Result<GuardrailOutcome> {
+		let subs = build_header_substitutions(http_headers, rules);
+		if subs.is_empty() {
+			return Ok(GuardrailOutcome::None);
+		}
+		let mut msgs = req.get_messages();
+		let mut any_changed = false;
+		for msg in &mut msgs {
+			let new_content = redact_with_subs(&msg.content, &subs);
+			if new_content.as_str() != msg.content.as_str() {
+				msg.content = new_content.into();
+				any_changed = true;
+			}
+		}
+		if any_changed {
+			req.set_messages(msgs);
+			return Ok(GuardrailOutcome::Masked);
+		}
+		Ok(GuardrailOutcome::None)
+	}
+
+	fn apply_header_redaction_response(
+		resp: &mut dyn ResponseType,
+		rules: &HeaderRedaction,
+		client_headers: &HeaderMap,
+	) -> anyhow::Result<GuardrailOutcome> {
+		let subs = build_header_substitutions(client_headers, rules);
+		if subs.is_empty() {
+			return Ok(GuardrailOutcome::None);
+		}
+		let mut choices = resp.to_webhook_choices();
+		let mut any_changed = false;
+		for choice in &mut choices {
+			let restored = unredact_with_subs(&choice.message.content, &subs);
+			if restored.as_str() != choice.message.content.as_str() {
+				choice.message.content = restored.into();
+				any_changed = true;
+			}
+		}
+		if any_changed {
+			resp.set_webhook_choices(choices)?;
+			return Ok(GuardrailOutcome::Masked);
+		}
+		Ok(GuardrailOutcome::None)
+	}
+
 	async fn apply_webhook(
 		req: &mut dyn RequestType,
 		http_headers: &HeaderMap,
@@ -1026,6 +1097,7 @@ impl Policy {
 		client: &PolicyClient,
 		resp: &mut dyn ResponseType,
 		http_headers: &HeaderMap,
+		client_headers: &HeaderMap,
 		guards: &Vec<ResponseGuard>,
 	) -> anyhow::Result<Option<Response>> {
 		for g in guards {
@@ -1062,6 +1134,27 @@ impl Policy {
 							crate::telemetry::metrics::GuardrailAction::Reject,
 						);
 						return Ok(Some(res));
+					}
+				},
+				ResponseGuardKind::HeaderRedaction(hr) => {
+					match Self::apply_header_redaction_response(resp, hr, client_headers)? {
+						GuardrailOutcome::Masked => {
+							Self::record_guardrail_trip(
+								client,
+								crate::telemetry::metrics::GuardrailPhase::Response,
+								crate::telemetry::metrics::GuardrailAction::Mask,
+							);
+						},
+						GuardrailOutcome::None => {
+							Self::record_guardrail_trip(
+								client,
+								crate::telemetry::metrics::GuardrailPhase::Response,
+								crate::telemetry::metrics::GuardrailAction::Allow,
+							);
+						},
+						GuardrailOutcome::Rejected(_) => {
+							unreachable!("header redaction never rejects")
+						},
 					}
 				},
 				ResponseGuardKind::BedrockGuardrails(bg) => {
@@ -1151,6 +1244,7 @@ pub struct RequestGuard {
 pub enum RequestGuardKind {
 	Regex(RegexRules),
 	Webhook(Webhook),
+	HeaderRedaction(HeaderRedaction),
 	OpenAIModeration(Moderation),
 	BedrockGuardrails(BedrockGuardrails),
 	GoogleModelArmor(GoogleModelArmor),
@@ -1224,6 +1318,27 @@ pub struct Webhook {
 	pub target: SimpleBackendReference,
 	#[serde(default, skip_serializing_if = "Vec::is_empty")]
 	pub forward_header_matches: Vec<HeaderMatch>,
+}
+
+/// HeaderRedaction performs symmetric request/response substitution driven by
+/// HTTP headers on the original client request. On the request side, every
+/// occurrence of a header value found in the prompt content is replaced with a
+/// token (e.g. `[FIRSTNAME]`). On the response side, the inverse substitution
+/// runs against the LLM response content using the same client headers.
+#[apply(schema!)]
+pub struct HeaderRedaction {
+	#[serde(default = "default_header_redaction_prefix")]
+	pub header_prefix: String,
+	#[serde(default = "default_header_redaction_token_format")]
+	pub token_format: String,
+}
+
+fn default_header_redaction_prefix() -> String {
+	"x-redact-".to_string()
+}
+
+fn default_header_redaction_token_format() -> String {
+	"[{NAME}]".to_string()
 }
 
 #[apply(schema!)]
@@ -1389,6 +1504,7 @@ pub struct ResponseGuard {
 pub enum ResponseGuardKind {
 	Regex(RegexRules),
 	Webhook(Webhook),
+	HeaderRedaction(HeaderRedaction),
 	BedrockGuardrails(BedrockGuardrails),
 	GoogleModelArmor(GoogleModelArmor),
 	AzureContentSafety(AzureContentSafety),
@@ -1396,6 +1512,63 @@ pub enum ResponseGuardKind {
 
 #[apply(schema!)]
 pub struct PromptGuardRegex {}
+
+/// Build the substitution table from headers matching the configured prefix.
+/// Returns (original_value, token) pairs sorted by original_value length descending,
+/// so longer matches are replaced before shorter ones (preventing partial matches).
+fn build_header_substitutions(
+	headers: &HeaderMap,
+	rules: &HeaderRedaction,
+) -> Vec<(String, String)> {
+	let prefix_lower = rules.header_prefix.to_ascii_lowercase();
+	let mut subs: Vec<(String, String)> = Vec::new();
+	for (name, value) in headers {
+		let n_lower = name.as_str().to_ascii_lowercase();
+		if !n_lower.starts_with(&prefix_lower) {
+			continue;
+		}
+		let Ok(v) = value.to_str() else { continue };
+		if v.len() < 2 {
+			continue;
+		}
+		let token_name = n_lower[prefix_lower.len()..].to_ascii_uppercase();
+		if token_name.is_empty() {
+			continue;
+		}
+		let token = rules.token_format.replace("{NAME}", &token_name);
+		subs.push((v.to_string(), token));
+	}
+	subs.sort_by(|a, b| b.0.len().cmp(&a.0.len()));
+	subs
+}
+
+/// Replace original values with tokens. Word-boundary, case-insensitive.
+fn redact_with_subs(content: &str, subs: &[(String, String)]) -> String {
+	if subs.is_empty() {
+		return content.to_string();
+	}
+	let mut out = content.to_string();
+	for (original, token) in subs {
+		let pattern = format!(r"(?i)\b{}\b", regex::escape(original));
+		if let Ok(re) = regex::Regex::new(&pattern) {
+			out = re.replace_all(&out, token.as_str()).to_string();
+		}
+	}
+	out
+}
+
+/// Replace tokens with original values. Direct string substitution.
+fn unredact_with_subs(content: &str, subs: &[(String, String)]) -> String {
+	if subs.is_empty() {
+		return content.to_string();
+	}
+	let mut out = content.to_string();
+	for (original, token) in subs {
+		out = out.replace(token, original);
+	}
+	out
+}
+
 fn default_code() -> StatusCode {
 	StatusCode::FORBIDDEN
 }

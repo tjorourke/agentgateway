@@ -1006,6 +1006,21 @@ message BackendPolicySpec {
       repeated HeaderMatch forward_header_matches = 3;
     }
 
+    // HeaderRedaction performs symmetric, in-process redaction of LLM prompt
+    // and response content based on HTTP headers attached to the original
+    // client request. Headers whose name starts with `header_prefix` are read;
+    // their values are replaced in `messages[].content` with a token derived
+    // from `token_format` (where `{NAME}` is the uppercased header suffix).
+    // The same substitution is reversed on the response side.
+    message HeaderRedaction {
+      // Header prefix that selects which headers carry redaction values.
+      // Default: "x-redact-".
+      string header_prefix = 1;
+      // Format string for the redaction token. {NAME} is replaced with the
+      // uppercased suffix of the matched header name. Default: "[{NAME}]".
+      string token_format = 2;
+    }
+
     message Moderation {
       // Model to use. Defaults to `omni-moderation-latest`
       optional string model = 1;
@@ -1066,6 +1081,7 @@ message BackendPolicySpec {
         GoogleModelArmor google_model_armor = 4;
         BedrockGuardrails bedrock_guardrails = 5;
         AzureContentSafety azure_content_safety = 6;
+        HeaderRedaction header_redaction = 7;
       }
     }
 
@@ -1080,6 +1096,7 @@ message BackendPolicySpec {
         GoogleModelArmor google_model_armor = 5;
         BedrockGuardrails bedrock_guardrails = 6;
         AzureContentSafety azure_content_safety = 7;
+        HeaderRedaction header_redaction = 8;
       }
     }
 

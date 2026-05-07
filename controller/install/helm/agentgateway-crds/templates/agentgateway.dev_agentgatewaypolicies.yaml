@@ -1383,6 +1383,26 @@ spec:
                                   - projectId
                                   - templateId
                                   type: object
+                                headerRedaction:
+                                  description: |-
+                                    `headerRedaction` performs symmetric, in-process redaction driven by
+                                    HTTP headers on the client request. See [HeaderRedaction](#fieldheaderredaction)
+                                    for details. No external service required.
+                                  properties:
+                                    headerPrefix:
+                                      default: x-redact-
+                                      description: |-
+                                        HeaderPrefix selects which client request headers carry redaction
+                                        values. Matching is case-insensitive. Defaults to `x-redact-`.
+                                      type: string
+                                    tokenFormat:
+                                      default: '[{NAME}]'
+                                      description: |-
+                                        TokenFormat is the substitution token template. The literal `{NAME}` is
+                                        replaced with the uppercased suffix of the matched header name.
+                                        Defaults to `[{NAME}]`.
+                                      type: string
+                                  type: object
                                 openAIModeration:
                                   description: |-
                                     `openAIModeration` passes prompt data through the OpenAI Moderations
@@ -2135,9 +2155,9 @@ spec:
                               type: object
                               x-kubernetes-validations:
                               - message: exactly one of the fields in [regex webhook
-                                  openAIModeration bedrockGuardrails googleModelArmor]
-                                  must be set
-                                rule: '[has(self.regex),has(self.webhook),has(self.openAIModeration),has(self.bedrockGuardrails),has(self.googleModelArmor)].filter(x,x==true).size()
+                                  headerRedaction openAIModeration bedrockGuardrails
+                                  googleModelArmor] must be set
+                                rule: '[has(self.regex),has(self.webhook),has(self.headerRedaction),has(self.openAIModeration),has(self.bedrockGuardrails),has(self.googleModelArmor)].filter(x,x==true).size()
                                   == 1'
                             maxItems: 8
                             minItems: 1
@@ -3253,6 +3273,26 @@ spec:
                                   - projectId
                                   - templateId
                                   type: object
+                                headerRedaction:
+                                  description: |-
+                                    `headerRedaction` un-redacts tokens in the response using the same
+                                    client request header values used at the request phase. See
+                                    [HeaderRedaction](#fieldheaderredaction).
+                                  properties:
+                                    headerPrefix:
+                                      default: x-redact-
+                                      description: |-
+                                        HeaderPrefix selects which client request headers carry redaction
+                                        values. Matching is case-insensitive. Defaults to `x-redact-`.
+                                      type: string
+                                    tokenFormat:
+                                      default: '[{NAME}]'
+                                      description: |-
+                                        TokenFormat is the substitution token template. The literal `{NAME}` is
+                                        replaced with the uppercased suffix of the matched header name.
+                                        Defaults to `[{NAME}]`.
+                                      type: string
+                                  type: object
                                 regex:
                                   description: Regular expression (regex) matching
                                     for prompt guards and data masking.
@@ -3470,8 +3510,9 @@ spec:
                               type: object
                               x-kubernetes-validations:
                               - message: exactly one of the fields in [regex webhook
-                                  bedrockGuardrails googleModelArmor] must be set
-                                rule: '[has(self.regex),has(self.webhook),has(self.bedrockGuardrails),has(self.googleModelArmor)].filter(x,x==true).size()
+                                  headerRedaction bedrockGuardrails googleModelArmor]
+                                  must be set
+                                rule: '[has(self.regex),has(self.webhook),has(self.headerRedaction),has(self.bedrockGuardrails),has(self.googleModelArmor)].filter(x,x==true).size()
                                   == 1'
                             maxItems: 8
                             minItems: 1

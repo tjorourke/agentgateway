@@ -1172,6 +1172,17 @@ func (this *BackendPolicySpec_Ai_Webhook) UnmarshalJSON(b []byte) error {
 	return ResourceUnmarshaler.Unmarshal(bytes.NewReader(b), this)
 }
 
+// MarshalJSON is a custom marshaler for BackendPolicySpec_Ai_HeaderRedaction
+func (this *BackendPolicySpec_Ai_HeaderRedaction) MarshalJSON() ([]byte, error) {
+	str, err := ResourceMarshaler.MarshalToString(this)
+	return []byte(str), err
+}
+
+// UnmarshalJSON is a custom unmarshaler for BackendPolicySpec_Ai_HeaderRedaction
+func (this *BackendPolicySpec_Ai_HeaderRedaction) UnmarshalJSON(b []byte) error {
+	return ResourceUnmarshaler.Unmarshal(bytes.NewReader(b), this)
+}
+
 // MarshalJSON is a custom marshaler for BackendPolicySpec_Ai_Moderation
 func (this *BackendPolicySpec_Ai_Moderation) MarshalJSON() ([]byte, error) {
 	str, err := ResourceMarshaler.MarshalToString(this)
