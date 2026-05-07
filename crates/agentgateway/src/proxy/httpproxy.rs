@@ -1817,6 +1817,11 @@ async fn make_backend_call(
 	)
 	.await?;
 	dtrace::snapshot!(Request, "final request", &req);
+	// Snapshot the outbound request headers before the request is consumed by the
+	// upstream call. These carry the client-supplied headers (including any
+	// `x-redact-*`) that downstream response-side guards (e.g. HeaderRedaction)
+	// need to perform symmetric request/response substitution.
+	let client_headers = req.headers().clone();
 	let call = client::Call {
 		req,
 		target: backend_call.target,
@@ -1866,6 +1871,7 @@ async fn make_backend_call(
 				llm_response_policies,
 				llm_response_log.expect("must be set"),
 				include_completion_in_log,
+				client_headers,
 				resp,
 			)
 			.await

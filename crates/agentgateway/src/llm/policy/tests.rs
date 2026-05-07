@@ -1341,3 +1341,491 @@ fn test_google_model_armor_implicit_auth_used_when_no_user_credentials() {
 		resolved.backend_auth
 	);
 }
+
+// ============================================================================
+// Header Redaction Tests
+// ============================================================================
+
+mod header_redaction_tests {
+	use ::http::HeaderValue;
+
+	use super::super::*;
+	use super::*;
+	use crate::llm::SimpleChatCompletionMessage;
+	use crate::llm::policy::webhook::{Message, ResponseChoice};
+	use crate::llm::types::{RequestType, ResponseType};
+
+	// --- Minimal trait mocks for focused dispatch tests ----------------------
+
+	struct MockRequest {
+		messages: Vec<SimpleChatCompletionMessage>,
+	}
+
+	impl MockRequest {
+		fn new(contents: &[&str]) -> Self {
+			Self {
+				messages: contents
+					.iter()
+					.map(|c| SimpleChatCompletionMessage {
+						role: strng::new("user"),
+						content: strng::new(*c),
+					})
+					.collect(),
+			}
+		}
+	}
+
+	impl RequestType for MockRequest {
+		fn model(&mut self) -> &mut Option<String> {
+			unimplemented!("not used by header redaction")
+		}
+		fn prepend_prompts(&mut self, _: Vec<SimpleChatCompletionMessage>) {
+			unimplemented!()
+		}
+		fn append_prompts(&mut self, _: Vec<SimpleChatCompletionMessage>) {
+			unimplemented!()
+		}
+		fn to_llm_request(
+			&self,
+			_: Strng,
+			_: bool,
+		) -> Result<crate::llm::LLMRequest, crate::llm::AIError> {
+			unimplemented!()
+		}
+		fn get_messages(&self) -> Vec<SimpleChatCompletionMessage> {
+			self.messages.clone()
+		}
+		fn set_messages(&mut self, messages: Vec<SimpleChatCompletionMessage>) {
+			self.messages = messages;
+		}
+	}
+
+	struct MockResponse {
+		choices: Vec<ResponseChoice>,
+	}
+
+	impl MockResponse {
+		fn new(contents: &[&str]) -> Self {
+			Self {
+				choices: contents
+					.iter()
+					.map(|c| ResponseChoice {
+						message: Message {
+							role: strng::new("assistant"),
+							content: strng::new(*c),
+						},
+					})
+					.collect(),
+			}
+		}
+	}
+
+	impl ResponseType for MockResponse {
+		fn to_llm_response(&self, _: bool) -> crate::llm::LLMResponse {
+			unimplemented!()
+		}
+		fn to_webhook_choices(&self) -> Vec<ResponseChoice> {
+			self.choices.clone()
+		}
+		fn set_webhook_choices(&mut self, choices: Vec<ResponseChoice>) -> anyhow::Result<()> {
+			self.choices = choices;
+			Ok(())
+		}
+		fn serialize(&self) -> serde_json::Result<Vec<u8>> {
+			Ok(Vec::new())
+		}
+	}
+
+	fn rules(prefix: &str, format: &str) -> HeaderRedaction {
+		HeaderRedaction {
+			header_prefix: prefix.to_string(),
+			token_format: format.to_string(),
+		}
+	}
+
+	fn default_rules() -> HeaderRedaction {
+		rules("x-redact-", "[{NAME}]")
+	}
+
+	// --- build_header_substitutions ------------------------------------------
+
+	#[test]
+	fn build_subs_returns_empty_when_no_matching_headers() {
+		let mut h = HeaderMap::new();
+		h.insert("x-other", HeaderValue::from_static("ignored"));
+		assert!(build_header_substitutions(&h, &default_rules()).is_empty());
+	}
+
+	#[test]
+	fn build_subs_collects_matching_headers() {
+		let mut h = HeaderMap::new();
+		h.insert("x-redact-firstname", HeaderValue::from_static("Tom"));
+		h.insert("x-redact-surname", HeaderValue::from_static("O'Rourke"));
+		h.insert("x-other", HeaderValue::from_static("ignored"));
+		let subs = build_header_substitutions(&h, &default_rules());
+		assert_eq!(subs.len(), 2);
+	}
+
+	#[test]
+	fn build_subs_orders_longest_first() {
+		let mut h = HeaderMap::new();
+		h.insert("x-redact-short", HeaderValue::from_static("Smith"));
+		h.insert("x-redact-full", HeaderValue::from_static("Smithson"));
+		let subs = build_header_substitutions(&h, &default_rules());
+		assert_eq!(subs[0].0, "Smithson", "longer value must come first");
+		assert_eq!(subs[1].0, "Smith");
+	}
+
+	#[test]
+	fn build_subs_uppercases_token_name() {
+		let mut h = HeaderMap::new();
+		h.insert("x-redact-firstname", HeaderValue::from_static("Tom"));
+		let subs = build_header_substitutions(&h, &default_rules());
+		assert_eq!(subs[0].1, "[FIRSTNAME]");
+	}
+
+	#[test]
+	fn build_subs_supports_custom_token_format() {
+		let mut h = HeaderMap::new();
+		h.insert("x-redact-firstname", HeaderValue::from_static("Tom"));
+		let r = rules("x-redact-", "<<{NAME}>>");
+		let subs = build_header_substitutions(&h, &r);
+		assert_eq!(subs[0].1, "<<FIRSTNAME>>");
+	}
+
+	#[test]
+	fn build_subs_supports_custom_prefix() {
+		let mut h = HeaderMap::new();
+		h.insert("x-pii-firstname", HeaderValue::from_static("Tom"));
+		h.insert("x-redact-other", HeaderValue::from_static("ignored"));
+		let r = rules("x-pii-", "[{NAME}]");
+		let subs = build_header_substitutions(&h, &r);
+		assert_eq!(subs.len(), 1);
+		assert_eq!(subs[0].1, "[FIRSTNAME]");
+	}
+
+	#[test]
+	fn build_subs_prefix_matching_is_case_insensitive() {
+		let mut h = HeaderMap::new();
+		h.insert("X-Redact-FirstName", HeaderValue::from_static("Tom"));
+		let subs = build_header_substitutions(&h, &default_rules());
+		assert_eq!(subs.len(), 1);
+		assert_eq!(subs[0].1, "[FIRSTNAME]");
+	}
+
+	#[test]
+	fn build_subs_skips_short_values() {
+		let mut h = HeaderMap::new();
+		h.insert("x-redact-x", HeaderValue::from_static("a"));
+		assert!(build_header_substitutions(&h, &default_rules()).is_empty());
+	}
+
+	#[test]
+	fn build_subs_skips_empty_token_name() {
+		let mut h = HeaderMap::new();
+		h.insert("x-redact-", HeaderValue::from_static("orphan"));
+		assert!(build_header_substitutions(&h, &default_rules()).is_empty());
+	}
+
+	// --- redact_with_subs ----------------------------------------------------
+
+	#[test]
+	fn redact_replaces_value_with_token() {
+		let subs = vec![("Tom".into(), "[FIRSTNAME]".into())];
+		assert_eq!(redact_with_subs("Tom is here", &subs), "[FIRSTNAME] is here");
+	}
+
+	#[test]
+	fn redact_is_case_insensitive() {
+		let subs = vec![("Tom".into(), "[FIRSTNAME]".into())];
+		assert_eq!(redact_with_subs("TOM is here", &subs), "[FIRSTNAME] is here");
+	}
+
+	#[test]
+	fn redact_respects_word_boundary() {
+		let subs = vec![("Tom".into(), "[FIRSTNAME]".into())];
+		assert_eq!(
+			redact_with_subs("Tomorrow we meet Tom", &subs),
+			"Tomorrow we meet [FIRSTNAME]",
+		);
+	}
+
+	#[test]
+	fn redact_handles_regex_special_chars() {
+		// Apostrophe is NOT a regex special char but other punctuation must
+		// be escaped or pattern compilation fails.
+		let subs = vec![("O'Rourke".into(), "[SURNAME]".into())];
+		assert_eq!(
+			redact_with_subs("Hello O'Rourke", &subs),
+			"Hello [SURNAME]",
+		);
+
+		let subs = vec![("a.b.c".into(), "[X]".into())];
+		// Dots in original must not be treated as regex wildcards.
+		assert_eq!(redact_with_subs("a.b.c and aXbXc", &subs), "[X] and aXbXc");
+	}
+
+	#[test]
+	fn redact_handles_multiple_subs() {
+		let subs = vec![
+			("Tom".into(), "[FIRSTNAME]".into()),
+			("O'Rourke".into(), "[SURNAME]".into()),
+		];
+		assert_eq!(
+			redact_with_subs("Tom O'Rourke is here", &subs),
+			"[FIRSTNAME] [SURNAME] is here",
+		);
+	}
+
+	#[test]
+	fn redact_with_empty_subs_is_identity() {
+		assert_eq!(redact_with_subs("hello", &[]), "hello");
+	}
+
+	// --- unredact_with_subs --------------------------------------------------
+
+	#[test]
+	fn unredact_replaces_token_with_value() {
+		let subs = vec![("Tom".into(), "[FIRSTNAME]".into())];
+		assert_eq!(
+			unredact_with_subs("[FIRSTNAME] is here", &subs),
+			"Tom is here",
+		);
+	}
+
+	#[test]
+	fn unredact_handles_multiple_occurrences() {
+		let subs = vec![("Tom".into(), "[FIRSTNAME]".into())];
+		assert_eq!(
+			unredact_with_subs("Hi [FIRSTNAME], yes [FIRSTNAME].", &subs),
+			"Hi Tom, yes Tom.",
+		);
+	}
+
+	#[test]
+	fn unredact_preserves_non_matching_text() {
+		let subs = vec![("Tom".into(), "[FIRSTNAME]".into())];
+		assert_eq!(unredact_with_subs("nothing here", &subs), "nothing here");
+	}
+
+	// --- round-trip ----------------------------------------------------------
+
+	#[test]
+	fn redact_then_unredact_is_identity_for_word_boundaries() {
+		let subs = vec![
+			("Tom".into(), "[FIRSTNAME]".into()),
+			("O'Rourke".into(), "[SURNAME]".into()),
+		];
+		let original = "Tom O'Rourke is here";
+		let masked = redact_with_subs(original, &subs);
+		let restored = unredact_with_subs(&masked, &subs);
+		assert_eq!(restored, original);
+	}
+
+	// --- apply_header_redaction_request --------------------------------------
+
+	fn build_headers(pairs: &[(&'static str, &'static str)]) -> HeaderMap {
+		let mut h = HeaderMap::new();
+		for (n, v) in pairs {
+			h.insert(*n, HeaderValue::from_static(v));
+		}
+		h
+	}
+
+	#[test]
+	fn apply_request_redacts_message_content() {
+		let mut req = MockRequest::new(&["My name is Tom O'Rourke"]);
+		let headers = build_headers(&[
+			("x-redact-firstname", "Tom"),
+			("x-redact-surname", "O'Rourke"),
+		]);
+		let outcome = Policy::apply_header_redaction_request(&mut req, &default_rules(), &headers)
+			.expect("redaction should succeed");
+		assert!(matches!(outcome, GuardrailOutcome::Masked));
+		assert_eq!(req.messages[0].content.as_str(), "My name is [FIRSTNAME] [SURNAME]");
+	}
+
+	#[test]
+	fn apply_request_returns_none_when_no_match() {
+		let mut req = MockRequest::new(&["nothing to redact"]);
+		let headers = build_headers(&[("x-redact-firstname", "Tom")]);
+		let outcome = Policy::apply_header_redaction_request(&mut req, &default_rules(), &headers)
+			.expect("should succeed");
+		assert!(matches!(outcome, GuardrailOutcome::None));
+		assert_eq!(req.messages[0].content.as_str(), "nothing to redact");
+	}
+
+	#[test]
+	fn apply_request_returns_none_when_no_headers() {
+		let mut req = MockRequest::new(&["Tom is here"]);
+		let headers = HeaderMap::new();
+		let outcome = Policy::apply_header_redaction_request(&mut req, &default_rules(), &headers)
+			.expect("should succeed");
+		assert!(matches!(outcome, GuardrailOutcome::None));
+	}
+
+	#[test]
+	fn apply_request_handles_multiple_messages() {
+		let mut req = MockRequest::new(&["hello Tom", "another note about Tom"]);
+		let headers = build_headers(&[("x-redact-firstname", "Tom")]);
+		let outcome = Policy::apply_header_redaction_request(&mut req, &default_rules(), &headers)
+			.expect("should succeed");
+		assert!(matches!(outcome, GuardrailOutcome::Masked));
+		assert_eq!(req.messages[0].content.as_str(), "hello [FIRSTNAME]");
+		assert_eq!(req.messages[1].content.as_str(), "another note about [FIRSTNAME]");
+	}
+
+	// --- apply_header_redaction_response -------------------------------------
+
+	#[test]
+	fn apply_response_unredacts_choice_content() {
+		let mut resp = MockResponse::new(&["[FIRSTNAME] [SURNAME] is here"]);
+		let headers = build_headers(&[
+			("x-redact-firstname", "Tom"),
+			("x-redact-surname", "O'Rourke"),
+		]);
+		let outcome = Policy::apply_header_redaction_response(&mut resp, &default_rules(), &headers)
+			.expect("should succeed");
+		assert!(matches!(outcome, GuardrailOutcome::Masked));
+		assert_eq!(resp.choices[0].message.content.as_str(), "Tom O'Rourke is here");
+	}
+
+	#[test]
+	fn apply_response_returns_none_when_no_token_present() {
+		let mut resp = MockResponse::new(&["LLM said nothing relevant"]);
+		let headers = build_headers(&[("x-redact-firstname", "Tom")]);
+		let outcome = Policy::apply_header_redaction_response(&mut resp, &default_rules(), &headers)
+			.expect("should succeed");
+		assert!(matches!(outcome, GuardrailOutcome::None));
+	}
+
+	#[test]
+	fn apply_response_returns_none_when_no_headers() {
+		let mut resp = MockResponse::new(&["[FIRSTNAME] is here"]);
+		let headers = HeaderMap::new();
+		let outcome = Policy::apply_header_redaction_response(&mut resp, &default_rules(), &headers)
+			.expect("should succeed");
+		assert!(matches!(outcome, GuardrailOutcome::None));
+		// Response content must be unchanged when no client headers are present.
+		assert_eq!(resp.choices[0].message.content.as_str(), "[FIRSTNAME] is here");
+	}
+
+	// --- end-to-end round trip via apply_prompt_guard / apply_response_prompt_guard
+
+	#[tokio::test]
+	async fn full_round_trip_via_dispatch() {
+		use crate::http::auth::BackendInfo;
+		use crate::test_helpers::proxymock::setup_proxy_test;
+		use crate::types::agent::{BackendTarget, Target};
+
+		let pol = Policy {
+			prompt_guard: Some(PromptGuard {
+				request: vec![RequestGuard {
+					rejection: RequestRejection::default(),
+					kind: RequestGuardKind::HeaderRedaction(default_rules()),
+				}],
+				response: vec![ResponseGuard {
+					rejection: RequestRejection::default(),
+					kind: ResponseGuardKind::HeaderRedaction(default_rules()),
+				}],
+			}),
+			..Default::default()
+		};
+
+		let t = setup_proxy_test("{}").expect("setup proxy inputs");
+		let inputs = t.inputs();
+		let backend_info = BackendInfo {
+			call_target: Target::Address("0.0.0.0:80".parse().unwrap()),
+			target: BackendTarget::Backend {
+				name: Default::default(),
+				namespace: Default::default(),
+				section: None,
+			},
+			inputs,
+		};
+		let headers = build_headers(&[
+			("x-redact-firstname", "Tom"),
+			("x-redact-surname", "O'Rourke"),
+		]);
+
+		// Request side
+		let mut req = MockRequest::new(&["Tom O'Rourke says hello"]);
+		let res = pol
+			.apply_prompt_guard(&backend_info, &mut req, &headers, None)
+			.await
+			.expect("apply_prompt_guard should not error");
+		assert!(res.is_none(), "redaction must not reject");
+		assert_eq!(
+			req.messages[0].content.as_str(),
+			"[FIRSTNAME] [SURNAME] says hello",
+		);
+
+		// Response side
+		let mut resp = MockResponse::new(&["Hello [FIRSTNAME] [SURNAME]"]);
+		let client = PolicyClient {
+			inputs: backend_info.inputs.clone(),
+		};
+		let upstream_headers = HeaderMap::new();
+		let res = Policy::apply_response_prompt_guard(
+			&client,
+			&mut resp,
+			&upstream_headers,
+			&headers,
+			&pol.prompt_guard.as_ref().unwrap().response,
+		)
+		.await
+		.expect("apply_response_prompt_guard should not error");
+		assert!(res.is_none());
+		assert_eq!(
+			resp.choices[0].message.content.as_str(),
+			"Hello Tom O'Rourke",
+		);
+	}
+
+	// --- Policy deserialization ----------------------------------------------
+
+	#[test]
+	fn policy_deserializes_header_redaction_request_variant() {
+		use serde_json::json;
+		let v = json!({
+			"promptGuard": {
+				"request": [
+					{ "headerRedaction": { "headerPrefix": "x-pii-", "tokenFormat": "<{NAME}>" } }
+				]
+			}
+		});
+		let pol: Policy = serde_json::from_value(v).expect("must deserialize");
+		let pg = pol.prompt_guard.expect("prompt_guard must be set");
+		assert_eq!(pg.request.len(), 1);
+		match &pg.request[0].kind {
+			RequestGuardKind::HeaderRedaction(hr) => {
+				assert_eq!(hr.header_prefix, "x-pii-");
+				assert_eq!(hr.token_format, "<{NAME}>");
+			},
+			other => panic!("expected HeaderRedaction, got {:?}", other),
+		}
+	}
+
+	#[test]
+	fn policy_deserializes_header_redaction_response_variant() {
+		use serde_json::json;
+		let v = json!({
+			"promptGuard": {
+				"response": [
+					{ "headerRedaction": {} }
+				]
+			}
+		});
+		let pol: Policy = serde_json::from_value(v).expect("must deserialize");
+		let pg = pol.prompt_guard.expect("prompt_guard must be set");
+		assert_eq!(pg.response.len(), 1);
+		match &pg.response[0].kind {
+			ResponseGuardKind::HeaderRedaction(hr) => {
+				// Empty config → defaults.
+				assert_eq!(hr.header_prefix, "x-redact-");
+				assert_eq!(hr.token_format, "[{NAME}]");
+			},
+			other => panic!("expected HeaderRedaction, got {:?}", other),
+		}
+	}
+}

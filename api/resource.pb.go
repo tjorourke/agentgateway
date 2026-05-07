@@ -11035,6 +11035,68 @@ func (x *BackendPolicySpec_Ai_Webhook) GetForwardHeaderMatches() []*HeaderMatch 
 	return nil
 }
 
+// HeaderRedaction performs symmetric, in-process redaction of LLM prompt
+// and response content based on HTTP headers attached to the original
+// client request. Headers whose name starts with `header_prefix` are read;
+// their values are replaced in `messages[].content` with a token derived
+// from `token_format` (where `{NAME}` is the uppercased header suffix).
+// The same substitution is reversed on the response side.
+type BackendPolicySpec_Ai_HeaderRedaction struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Header prefix that selects which headers carry redaction values.
+	// Default: "x-redact-".
+	HeaderPrefix string `protobuf:"bytes,1,opt,name=header_prefix,json=headerPrefix,proto3" json:"header_prefix,omitempty"`
+	// Format string for the redaction token. {NAME} is replaced with the
+	// uppercased suffix of the matched header name. Default: "[{NAME}]".
+	TokenFormat   string `protobuf:"bytes,2,opt,name=token_format,json=tokenFormat,proto3" json:"token_format,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *BackendPolicySpec_Ai_HeaderRedaction) Reset() {
+	*x = BackendPolicySpec_Ai_HeaderRedaction{}
+	mi := &file_resource_proto_msgTypes[134]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *BackendPolicySpec_Ai_HeaderRedaction) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BackendPolicySpec_Ai_HeaderRedaction) ProtoMessage() {}
+
+func (x *BackendPolicySpec_Ai_HeaderRedaction) ProtoReflect() protoreflect.Message {
+	mi := &file_resource_proto_msgTypes[134]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BackendPolicySpec_Ai_HeaderRedaction.ProtoReflect.Descriptor instead.
+func (*BackendPolicySpec_Ai_HeaderRedaction) Descriptor() ([]byte, []int) {
+	return file_resource_proto_rawDescGZIP(), []int{50, 0, 5}
+}
+
+func (x *BackendPolicySpec_Ai_HeaderRedaction) GetHeaderPrefix() string {
+	if x != nil {
+		return x.HeaderPrefix
+	}
+	return ""
+}
+
+func (x *BackendPolicySpec_Ai_HeaderRedaction) GetTokenFormat() string {
+	if x != nil {
+		return x.TokenFormat
+	}
+	return ""
+}
+
 type BackendPolicySpec_Ai_Moderation struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Model to use. Defaults to `omni-moderation-latest`
@@ -11046,7 +11108,7 @@ type BackendPolicySpec_Ai_Moderation struct {
 
 func (x *BackendPolicySpec_Ai_Moderation) Reset() {
 	*x = BackendPolicySpec_Ai_Moderation{}
-	mi := &file_resource_proto_msgTypes[134]
+	mi := &file_resource_proto_msgTypes[135]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -11058,7 +11120,7 @@ func (x *BackendPolicySpec_Ai_Moderation) String() string {
 func (*BackendPolicySpec_Ai_Moderation) ProtoMessage() {}
 
 func (x *BackendPolicySpec_Ai_Moderation) ProtoReflect() protoreflect.Message {
-	mi := &file_resource_proto_msgTypes[134]
+	mi := &file_resource_proto_msgTypes[135]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -11071,7 +11133,7 @@ func (x *BackendPolicySpec_Ai_Moderation) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BackendPolicySpec_Ai_Moderation.ProtoReflect.Descriptor instead.
 func (*BackendPolicySpec_Ai_Moderation) Descriptor() ([]byte, []int) {
-	return file_resource_proto_rawDescGZIP(), []int{50, 0, 5}
+	return file_resource_proto_rawDescGZIP(), []int{50, 0, 6}
 }
 
 func (x *BackendPolicySpec_Ai_Moderation) GetModel() string {
@@ -11101,7 +11163,7 @@ type BackendPolicySpec_Ai_BedrockGuardrails struct {
 
 func (x *BackendPolicySpec_Ai_BedrockGuardrails) Reset() {
 	*x = BackendPolicySpec_Ai_BedrockGuardrails{}
-	mi := &file_resource_proto_msgTypes[135]
+	mi := &file_resource_proto_msgTypes[136]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -11113,7 +11175,7 @@ func (x *BackendPolicySpec_Ai_BedrockGuardrails) String() string {
 func (*BackendPolicySpec_Ai_BedrockGuardrails) ProtoMessage() {}
 
 func (x *BackendPolicySpec_Ai_BedrockGuardrails) ProtoReflect() protoreflect.Message {
-	mi := &file_resource_proto_msgTypes[135]
+	mi := &file_resource_proto_msgTypes[136]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -11126,7 +11188,7 @@ func (x *BackendPolicySpec_Ai_BedrockGuardrails) ProtoReflect() protoreflect.Mes
 
 // Deprecated: Use BackendPolicySpec_Ai_BedrockGuardrails.ProtoReflect.Descriptor instead.
 func (*BackendPolicySpec_Ai_BedrockGuardrails) Descriptor() ([]byte, []int) {
-	return file_resource_proto_rawDescGZIP(), []int{50, 0, 6}
+	return file_resource_proto_rawDescGZIP(), []int{50, 0, 7}
 }
 
 func (x *BackendPolicySpec_Ai_BedrockGuardrails) GetIdentifier() string {
@@ -11170,7 +11232,7 @@ type BackendPolicySpec_Ai_GoogleModelArmor struct {
 
 func (x *BackendPolicySpec_Ai_GoogleModelArmor) Reset() {
 	*x = BackendPolicySpec_Ai_GoogleModelArmor{}
-	mi := &file_resource_proto_msgTypes[136]
+	mi := &file_resource_proto_msgTypes[137]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -11182,7 +11244,7 @@ func (x *BackendPolicySpec_Ai_GoogleModelArmor) String() string {
 func (*BackendPolicySpec_Ai_GoogleModelArmor) ProtoMessage() {}
 
 func (x *BackendPolicySpec_Ai_GoogleModelArmor) ProtoReflect() protoreflect.Message {
-	mi := &file_resource_proto_msgTypes[136]
+	mi := &file_resource_proto_msgTypes[137]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -11195,7 +11257,7 @@ func (x *BackendPolicySpec_Ai_GoogleModelArmor) ProtoReflect() protoreflect.Mess
 
 // Deprecated: Use BackendPolicySpec_Ai_GoogleModelArmor.ProtoReflect.Descriptor instead.
 func (*BackendPolicySpec_Ai_GoogleModelArmor) Descriptor() ([]byte, []int) {
-	return file_resource_proto_rawDescGZIP(), []int{50, 0, 7}
+	return file_resource_proto_rawDescGZIP(), []int{50, 0, 8}
 }
 
 func (x *BackendPolicySpec_Ai_GoogleModelArmor) GetTemplateId() string {
@@ -11245,7 +11307,7 @@ type BackendPolicySpec_Ai_AzureContentSafety struct {
 
 func (x *BackendPolicySpec_Ai_AzureContentSafety) Reset() {
 	*x = BackendPolicySpec_Ai_AzureContentSafety{}
-	mi := &file_resource_proto_msgTypes[137]
+	mi := &file_resource_proto_msgTypes[138]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -11257,7 +11319,7 @@ func (x *BackendPolicySpec_Ai_AzureContentSafety) String() string {
 func (*BackendPolicySpec_Ai_AzureContentSafety) ProtoMessage() {}
 
 func (x *BackendPolicySpec_Ai_AzureContentSafety) ProtoReflect() protoreflect.Message {
-	mi := &file_resource_proto_msgTypes[137]
+	mi := &file_resource_proto_msgTypes[138]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -11270,7 +11332,7 @@ func (x *BackendPolicySpec_Ai_AzureContentSafety) ProtoReflect() protoreflect.Me
 
 // Deprecated: Use BackendPolicySpec_Ai_AzureContentSafety.ProtoReflect.Descriptor instead.
 func (*BackendPolicySpec_Ai_AzureContentSafety) Descriptor() ([]byte, []int) {
-	return file_resource_proto_rawDescGZIP(), []int{50, 0, 8}
+	return file_resource_proto_rawDescGZIP(), []int{50, 0, 9}
 }
 
 func (x *BackendPolicySpec_Ai_AzureContentSafety) GetEndpoint() string {
@@ -11326,7 +11388,7 @@ type BackendPolicySpec_Ai_RequestRejection struct {
 
 func (x *BackendPolicySpec_Ai_RequestRejection) Reset() {
 	*x = BackendPolicySpec_Ai_RequestRejection{}
-	mi := &file_resource_proto_msgTypes[138]
+	mi := &file_resource_proto_msgTypes[139]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -11338,7 +11400,7 @@ func (x *BackendPolicySpec_Ai_RequestRejection) String() string {
 func (*BackendPolicySpec_Ai_RequestRejection) ProtoMessage() {}
 
 func (x *BackendPolicySpec_Ai_RequestRejection) ProtoReflect() protoreflect.Message {
-	mi := &file_resource_proto_msgTypes[138]
+	mi := &file_resource_proto_msgTypes[139]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -11351,7 +11413,7 @@ func (x *BackendPolicySpec_Ai_RequestRejection) ProtoReflect() protoreflect.Mess
 
 // Deprecated: Use BackendPolicySpec_Ai_RequestRejection.ProtoReflect.Descriptor instead.
 func (*BackendPolicySpec_Ai_RequestRejection) Descriptor() ([]byte, []int) {
-	return file_resource_proto_rawDescGZIP(), []int{50, 0, 9}
+	return file_resource_proto_rawDescGZIP(), []int{50, 0, 10}
 }
 
 func (x *BackendPolicySpec_Ai_RequestRejection) GetBody() []byte {
@@ -11380,6 +11442,7 @@ type BackendPolicySpec_Ai_ResponseGuard struct {
 	//	*BackendPolicySpec_Ai_ResponseGuard_GoogleModelArmor
 	//	*BackendPolicySpec_Ai_ResponseGuard_BedrockGuardrails
 	//	*BackendPolicySpec_Ai_ResponseGuard_AzureContentSafety
+	//	*BackendPolicySpec_Ai_ResponseGuard_HeaderRedaction
 	Kind          isBackendPolicySpec_Ai_ResponseGuard_Kind `protobuf_oneof:"kind"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -11387,7 +11450,7 @@ type BackendPolicySpec_Ai_ResponseGuard struct {
 
 func (x *BackendPolicySpec_Ai_ResponseGuard) Reset() {
 	*x = BackendPolicySpec_Ai_ResponseGuard{}
-	mi := &file_resource_proto_msgTypes[139]
+	mi := &file_resource_proto_msgTypes[140]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -11399,7 +11462,7 @@ func (x *BackendPolicySpec_Ai_ResponseGuard) String() string {
 func (*BackendPolicySpec_Ai_ResponseGuard) ProtoMessage() {}
 
 func (x *BackendPolicySpec_Ai_ResponseGuard) ProtoReflect() protoreflect.Message {
-	mi := &file_resource_proto_msgTypes[139]
+	mi := &file_resource_proto_msgTypes[140]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -11412,7 +11475,7 @@ func (x *BackendPolicySpec_Ai_ResponseGuard) ProtoReflect() protoreflect.Message
 
 // Deprecated: Use BackendPolicySpec_Ai_ResponseGuard.ProtoReflect.Descriptor instead.
 func (*BackendPolicySpec_Ai_ResponseGuard) Descriptor() ([]byte, []int) {
-	return file_resource_proto_rawDescGZIP(), []int{50, 0, 10}
+	return file_resource_proto_rawDescGZIP(), []int{50, 0, 11}
 }
 
 func (x *BackendPolicySpec_Ai_ResponseGuard) GetRejection() *BackendPolicySpec_Ai_RequestRejection {
@@ -11474,6 +11537,15 @@ func (x *BackendPolicySpec_Ai_ResponseGuard) GetAzureContentSafety() *BackendPol
 	return nil
 }
 
+func (x *BackendPolicySpec_Ai_ResponseGuard) GetHeaderRedaction() *BackendPolicySpec_Ai_HeaderRedaction {
+	if x != nil {
+		if x, ok := x.Kind.(*BackendPolicySpec_Ai_ResponseGuard_HeaderRedaction); ok {
+			return x.HeaderRedaction
+		}
+	}
+	return nil
+}
+
 type isBackendPolicySpec_Ai_ResponseGuard_Kind interface {
 	isBackendPolicySpec_Ai_ResponseGuard_Kind()
 }
@@ -11498,6 +11570,10 @@ type BackendPolicySpec_Ai_ResponseGuard_AzureContentSafety struct {
 	AzureContentSafety *BackendPolicySpec_Ai_AzureContentSafety `protobuf:"bytes,6,opt,name=azure_content_safety,json=azureContentSafety,proto3,oneof"`
 }
 
+type BackendPolicySpec_Ai_ResponseGuard_HeaderRedaction struct {
+	HeaderRedaction *BackendPolicySpec_Ai_HeaderRedaction `protobuf:"bytes,7,opt,name=header_redaction,json=headerRedaction,proto3,oneof"`
+}
+
 func (*BackendPolicySpec_Ai_ResponseGuard_Regex) isBackendPolicySpec_Ai_ResponseGuard_Kind() {}
 
 func (*BackendPolicySpec_Ai_ResponseGuard_Webhook) isBackendPolicySpec_Ai_ResponseGuard_Kind() {}
@@ -11509,6 +11585,9 @@ func (*BackendPolicySpec_Ai_ResponseGuard_BedrockGuardrails) isBackendPolicySpec
 }
 
 func (*BackendPolicySpec_Ai_ResponseGuard_AzureContentSafety) isBackendPolicySpec_Ai_ResponseGuard_Kind() {
+}
+
+func (*BackendPolicySpec_Ai_ResponseGuard_HeaderRedaction) isBackendPolicySpec_Ai_ResponseGuard_Kind() {
 }
 
 // Configuration for guarding/processing prompts
@@ -11524,6 +11603,7 @@ type BackendPolicySpec_Ai_RequestGuard struct {
 	//	*BackendPolicySpec_Ai_RequestGuard_GoogleModelArmor
 	//	*BackendPolicySpec_Ai_RequestGuard_BedrockGuardrails
 	//	*BackendPolicySpec_Ai_RequestGuard_AzureContentSafety
+	//	*BackendPolicySpec_Ai_RequestGuard_HeaderRedaction
 	Kind          isBackendPolicySpec_Ai_RequestGuard_Kind `protobuf_oneof:"kind"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -11531,7 +11611,7 @@ type BackendPolicySpec_Ai_RequestGuard struct {
 
 func (x *BackendPolicySpec_Ai_RequestGuard) Reset() {
 	*x = BackendPolicySpec_Ai_RequestGuard{}
-	mi := &file_resource_proto_msgTypes[140]
+	mi := &file_resource_proto_msgTypes[141]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -11543,7 +11623,7 @@ func (x *BackendPolicySpec_Ai_RequestGuard) String() string {
 func (*BackendPolicySpec_Ai_RequestGuard) ProtoMessage() {}
 
 func (x *BackendPolicySpec_Ai_RequestGuard) ProtoReflect() protoreflect.Message {
-	mi := &file_resource_proto_msgTypes[140]
+	mi := &file_resource_proto_msgTypes[141]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -11556,7 +11636,7 @@ func (x *BackendPolicySpec_Ai_RequestGuard) ProtoReflect() protoreflect.Message 
 
 // Deprecated: Use BackendPolicySpec_Ai_RequestGuard.ProtoReflect.Descriptor instead.
 func (*BackendPolicySpec_Ai_RequestGuard) Descriptor() ([]byte, []int) {
-	return file_resource_proto_rawDescGZIP(), []int{50, 0, 11}
+	return file_resource_proto_rawDescGZIP(), []int{50, 0, 12}
 }
 
 func (x *BackendPolicySpec_Ai_RequestGuard) GetRejection() *BackendPolicySpec_Ai_RequestRejection {
@@ -11627,6 +11707,15 @@ func (x *BackendPolicySpec_Ai_RequestGuard) GetAzureContentSafety() *BackendPoli
 	return nil
 }
 
+func (x *BackendPolicySpec_Ai_RequestGuard) GetHeaderRedaction() *BackendPolicySpec_Ai_HeaderRedaction {
+	if x != nil {
+		if x, ok := x.Kind.(*BackendPolicySpec_Ai_RequestGuard_HeaderRedaction); ok {
+			return x.HeaderRedaction
+		}
+	}
+	return nil
+}
+
 type isBackendPolicySpec_Ai_RequestGuard_Kind interface {
 	isBackendPolicySpec_Ai_RequestGuard_Kind()
 }
@@ -11655,6 +11744,10 @@ type BackendPolicySpec_Ai_RequestGuard_AzureContentSafety struct {
 	AzureContentSafety *BackendPolicySpec_Ai_AzureContentSafety `protobuf:"bytes,7,opt,name=azure_content_safety,json=azureContentSafety,proto3,oneof"`
 }
 
+type BackendPolicySpec_Ai_RequestGuard_HeaderRedaction struct {
+	HeaderRedaction *BackendPolicySpec_Ai_HeaderRedaction `protobuf:"bytes,8,opt,name=header_redaction,json=headerRedaction,proto3,oneof"`
+}
+
 func (*BackendPolicySpec_Ai_RequestGuard_Regex) isBackendPolicySpec_Ai_RequestGuard_Kind() {}
 
 func (*BackendPolicySpec_Ai_RequestGuard_Webhook) isBackendPolicySpec_Ai_RequestGuard_Kind() {}
@@ -11671,6 +11764,9 @@ func (*BackendPolicySpec_Ai_RequestGuard_BedrockGuardrails) isBackendPolicySpec_
 func (*BackendPolicySpec_Ai_RequestGuard_AzureContentSafety) isBackendPolicySpec_Ai_RequestGuard_Kind() {
 }
 
+func (*BackendPolicySpec_Ai_RequestGuard_HeaderRedaction) isBackendPolicySpec_Ai_RequestGuard_Kind() {
+}
+
 type BackendPolicySpec_Ai_PromptGuard struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Guards applied to client requests before they reach the LLM
@@ -11683,7 +11779,7 @@ type BackendPolicySpec_Ai_PromptGuard struct {
 
 func (x *BackendPolicySpec_Ai_PromptGuard) Reset() {
 	*x = BackendPolicySpec_Ai_PromptGuard{}
-	mi := &file_resource_proto_msgTypes[141]
+	mi := &file_resource_proto_msgTypes[142]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -11695,7 +11791,7 @@ func (x *BackendPolicySpec_Ai_PromptGuard) String() string {
 func (*BackendPolicySpec_Ai_PromptGuard) ProtoMessage() {}
 
 func (x *BackendPolicySpec_Ai_PromptGuard) ProtoReflect() protoreflect.Message {
-	mi := &file_resource_proto_msgTypes[141]
+	mi := &file_resource_proto_msgTypes[142]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -11708,7 +11804,7 @@ func (x *BackendPolicySpec_Ai_PromptGuard) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BackendPolicySpec_Ai_PromptGuard.ProtoReflect.Descriptor instead.
 func (*BackendPolicySpec_Ai_PromptGuard) Descriptor() ([]byte, []int) {
-	return file_resource_proto_rawDescGZIP(), []int{50, 0, 12}
+	return file_resource_proto_rawDescGZIP(), []int{50, 0, 13}
 }
 
 func (x *BackendPolicySpec_Ai_PromptGuard) GetRequest() []*BackendPolicySpec_Ai_RequestGuard {
@@ -11739,7 +11835,7 @@ type BackendPolicySpec_Ai_PromptCaching struct {
 
 func (x *BackendPolicySpec_Ai_PromptCaching) Reset() {
 	*x = BackendPolicySpec_Ai_PromptCaching{}
-	mi := &file_resource_proto_msgTypes[142]
+	mi := &file_resource_proto_msgTypes[143]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -11751,7 +11847,7 @@ func (x *BackendPolicySpec_Ai_PromptCaching) String() string {
 func (*BackendPolicySpec_Ai_PromptCaching) ProtoMessage() {}
 
 func (x *BackendPolicySpec_Ai_PromptCaching) ProtoReflect() protoreflect.Message {
-	mi := &file_resource_proto_msgTypes[142]
+	mi := &file_resource_proto_msgTypes[143]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -11764,7 +11860,7 @@ func (x *BackendPolicySpec_Ai_PromptCaching) ProtoReflect() protoreflect.Message
 
 // Deprecated: Use BackendPolicySpec_Ai_PromptCaching.ProtoReflect.Descriptor instead.
 func (*BackendPolicySpec_Ai_PromptCaching) Descriptor() ([]byte, []int) {
-	return file_resource_proto_rawDescGZIP(), []int{50, 0, 13}
+	return file_resource_proto_rawDescGZIP(), []int{50, 0, 14}
 }
 
 func (x *BackendPolicySpec_Ai_PromptCaching) GetCacheSystem() bool {
@@ -11811,7 +11907,7 @@ type BackendPolicySpec_McpAuthentication_ResourceMetadata struct {
 
 func (x *BackendPolicySpec_McpAuthentication_ResourceMetadata) Reset() {
 	*x = BackendPolicySpec_McpAuthentication_ResourceMetadata{}
-	mi := &file_resource_proto_msgTypes[148]
+	mi := &file_resource_proto_msgTypes[149]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -11823,7 +11919,7 @@ func (x *BackendPolicySpec_McpAuthentication_ResourceMetadata) String() string {
 func (*BackendPolicySpec_McpAuthentication_ResourceMetadata) ProtoMessage() {}
 
 func (x *BackendPolicySpec_McpAuthentication_ResourceMetadata) ProtoReflect() protoreflect.Message {
-	mi := &file_resource_proto_msgTypes[148]
+	mi := &file_resource_proto_msgTypes[149]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -11856,7 +11952,7 @@ type AIBackend_HostOverride struct {
 
 func (x *AIBackend_HostOverride) Reset() {
 	*x = AIBackend_HostOverride{}
-	mi := &file_resource_proto_msgTypes[150]
+	mi := &file_resource_proto_msgTypes[151]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -11868,7 +11964,7 @@ func (x *AIBackend_HostOverride) String() string {
 func (*AIBackend_HostOverride) ProtoMessage() {}
 
 func (x *AIBackend_HostOverride) ProtoReflect() protoreflect.Message {
-	mi := &file_resource_proto_msgTypes[150]
+	mi := &file_resource_proto_msgTypes[151]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -11907,7 +12003,7 @@ type AIBackend_OpenAI struct {
 
 func (x *AIBackend_OpenAI) Reset() {
 	*x = AIBackend_OpenAI{}
-	mi := &file_resource_proto_msgTypes[151]
+	mi := &file_resource_proto_msgTypes[152]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -11919,7 +12015,7 @@ func (x *AIBackend_OpenAI) String() string {
 func (*AIBackend_OpenAI) ProtoMessage() {}
 
 func (x *AIBackend_OpenAI) ProtoReflect() protoreflect.Message {
-	mi := &file_resource_proto_msgTypes[151]
+	mi := &file_resource_proto_msgTypes[152]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -11951,7 +12047,7 @@ type AIBackend_Gemini struct {
 
 func (x *AIBackend_Gemini) Reset() {
 	*x = AIBackend_Gemini{}
-	mi := &file_resource_proto_msgTypes[152]
+	mi := &file_resource_proto_msgTypes[153]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -11963,7 +12059,7 @@ func (x *AIBackend_Gemini) String() string {
 func (*AIBackend_Gemini) ProtoMessage() {}
 
 func (x *AIBackend_Gemini) ProtoReflect() protoreflect.Message {
-	mi := &file_resource_proto_msgTypes[152]
+	mi := &file_resource_proto_msgTypes[153]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -11997,7 +12093,7 @@ type AIBackend_Vertex struct {
 
 func (x *AIBackend_Vertex) Reset() {
 	*x = AIBackend_Vertex{}
-	mi := &file_resource_proto_msgTypes[153]
+	mi := &file_resource_proto_msgTypes[154]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -12009,7 +12105,7 @@ func (x *AIBackend_Vertex) String() string {
 func (*AIBackend_Vertex) ProtoMessage() {}
 
 func (x *AIBackend_Vertex) ProtoReflect() protoreflect.Message {
-	mi := &file_resource_proto_msgTypes[153]
+	mi := &file_resource_proto_msgTypes[154]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -12055,7 +12151,7 @@ type AIBackend_Anthropic struct {
 
 func (x *AIBackend_Anthropic) Reset() {
 	*x = AIBackend_Anthropic{}
-	mi := &file_resource_proto_msgTypes[154]
+	mi := &file_resource_proto_msgTypes[155]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -12067,7 +12163,7 @@ func (x *AIBackend_Anthropic) String() string {
 func (*AIBackend_Anthropic) ProtoMessage() {}
 
 func (x *AIBackend_Anthropic) ProtoReflect() protoreflect.Message {
-	mi := &file_resource_proto_msgTypes[154]
+	mi := &file_resource_proto_msgTypes[155]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -12102,7 +12198,7 @@ type AIBackend_Bedrock struct {
 
 func (x *AIBackend_Bedrock) Reset() {
 	*x = AIBackend_Bedrock{}
-	mi := &file_resource_proto_msgTypes[155]
+	mi := &file_resource_proto_msgTypes[156]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -12114,7 +12210,7 @@ func (x *AIBackend_Bedrock) String() string {
 func (*AIBackend_Bedrock) ProtoMessage() {}
 
 func (x *AIBackend_Bedrock) ProtoReflect() protoreflect.Message {
-	mi := &file_resource_proto_msgTypes[155]
+	mi := &file_resource_proto_msgTypes[156]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -12170,7 +12266,7 @@ type AIBackend_AzureOpenAI struct {
 
 func (x *AIBackend_AzureOpenAI) Reset() {
 	*x = AIBackend_AzureOpenAI{}
-	mi := &file_resource_proto_msgTypes[156]
+	mi := &file_resource_proto_msgTypes[157]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -12182,7 +12278,7 @@ func (x *AIBackend_AzureOpenAI) String() string {
 func (*AIBackend_AzureOpenAI) ProtoMessage() {}
 
 func (x *AIBackend_AzureOpenAI) ProtoReflect() protoreflect.Message {
-	mi := &file_resource_proto_msgTypes[156]
+	mi := &file_resource_proto_msgTypes[157]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -12246,7 +12342,7 @@ type AIBackend_Azure struct {
 
 func (x *AIBackend_Azure) Reset() {
 	*x = AIBackend_Azure{}
-	mi := &file_resource_proto_msgTypes[157]
+	mi := &file_resource_proto_msgTypes[158]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -12258,7 +12354,7 @@ func (x *AIBackend_Azure) String() string {
 func (*AIBackend_Azure) ProtoMessage() {}
 
 func (x *AIBackend_Azure) ProtoReflect() protoreflect.Message {
-	mi := &file_resource_proto_msgTypes[157]
+	mi := &file_resource_proto_msgTypes[158]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -12332,7 +12428,7 @@ type AIBackend_Provider struct {
 
 func (x *AIBackend_Provider) Reset() {
 	*x = AIBackend_Provider{}
-	mi := &file_resource_proto_msgTypes[158]
+	mi := &file_resource_proto_msgTypes[159]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -12344,7 +12440,7 @@ func (x *AIBackend_Provider) String() string {
 func (*AIBackend_Provider) ProtoMessage() {}
 
 func (x *AIBackend_Provider) ProtoReflect() protoreflect.Message {
-	mi := &file_resource_proto_msgTypes[158]
+	mi := &file_resource_proto_msgTypes[159]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -12520,7 +12616,7 @@ type AIBackend_ProviderGroup struct {
 
 func (x *AIBackend_ProviderGroup) Reset() {
 	*x = AIBackend_ProviderGroup{}
-	mi := &file_resource_proto_msgTypes[159]
+	mi := &file_resource_proto_msgTypes[160]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -12532,7 +12628,7 @@ func (x *AIBackend_ProviderGroup) String() string {
 func (*AIBackend_ProviderGroup) ProtoMessage() {}
 
 func (x *AIBackend_ProviderGroup) ProtoReflect() protoreflect.Message {
-	mi := &file_resource_proto_msgTypes[159]
+	mi := &file_resource_proto_msgTypes[160]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -12565,7 +12661,7 @@ type BackendReference_Service struct {
 
 func (x *BackendReference_Service) Reset() {
 	*x = BackendReference_Service{}
-	mi := &file_resource_proto_msgTypes[160]
+	mi := &file_resource_proto_msgTypes[161]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -12577,7 +12673,7 @@ func (x *BackendReference_Service) String() string {
 func (*BackendReference_Service) ProtoMessage() {}
 
 func (x *BackendReference_Service) ProtoReflect() protoreflect.Message {
-	mi := &file_resource_proto_msgTypes[160]
+	mi := &file_resource_proto_msgTypes[161]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -13266,7 +13362,7 @@ const file_resource_proto_rawDesc = "" +
 	"\vPolicyPhase\x12\t\n" +
 	"\x05ROUTE\x10\x00\x12\v\n" +
 	"\aGATEWAY\x10\x01B\x06\n" +
-	"\x04kind\"\xccI\n" +
+	"\x04kind\"\x83L\n" +
 	"\x11BackendPolicySpec\x12D\n" +
 	"\x03a2a\x18\x01 \x01(\v20.agentgateway.dev.resource.BackendPolicySpec.A2aH\x00R\x03a2a\x12l\n" +
 	"\x11inference_routing\x18\x02 \x01(\v2=.agentgateway.dev.resource.BackendPolicySpec.InferenceRoutingH\x00R\x10inferenceRouting\x12Z\n" +
@@ -13286,7 +13382,7 @@ const file_resource_proto_rawDesc = "" +
 	"backendTcp\x12k\n" +
 	"\x0etransformation\x18\x0e \x01(\v2A.agentgateway.dev.resource.TrafficPolicySpec.TransformationPolicyH\x00R\x0etransformation\x12M\n" +
 	"\x06health\x18\x0f \x01(\v23.agentgateway.dev.resource.BackendPolicySpec.HealthH\x00R\x06health\x12c\n" +
-	"\x0ebackend_tunnel\x18\x10 \x01(\v2:.agentgateway.dev.resource.BackendPolicySpec.BackendTunnelH\x00R\rbackendTunnel\x1a\xd9'\n" +
+	"\x0ebackend_tunnel\x18\x10 \x01(\v2:.agentgateway.dev.resource.BackendPolicySpec.BackendTunnelH\x00R\rbackendTunnel\x1a\x90*\n" +
 	"\x02Ai\x12^\n" +
 	"\fprompt_guard\x18\x01 \x01(\v2;.agentgateway.dev.resource.BackendPolicySpec.Ai.PromptGuardR\vpromptGuard\x12Y\n" +
 	"\bdefaults\x18\x02 \x03(\v2=.agentgateway.dev.resource.BackendPolicySpec.Ai.DefaultsEntryR\bdefaults\x12\\\n" +
@@ -13312,7 +13408,10 @@ const file_resource_proto_rawDesc = "" +
 	"\x05rules\x18\x02 \x03(\v29.agentgateway.dev.resource.BackendPolicySpec.Ai.RegexRuleR\x05rules\x1a\xae\x01\n" +
 	"\aWebhook\x12E\n" +
 	"\abackend\x18\x01 \x01(\v2+.agentgateway.dev.resource.BackendReferenceR\abackend\x12\\\n" +
-	"\x16forward_header_matches\x18\x03 \x03(\v2&.agentgateway.dev.resource.HeaderMatchR\x14forwardHeaderMatches\x1a\x88\x01\n" +
+	"\x16forward_header_matches\x18\x03 \x03(\v2&.agentgateway.dev.resource.HeaderMatchR\x14forwardHeaderMatches\x1aY\n" +
+	"\x0fHeaderRedaction\x12#\n" +
+	"\rheader_prefix\x18\x01 \x01(\tR\fheaderPrefix\x12!\n" +
+	"\ftoken_format\x18\x02 \x01(\tR\vtokenFormat\x1a\x88\x01\n" +
 	"\n" +
 	"Moderation\x12\x19\n" +
 	"\x05model\x18\x01 \x01(\tH\x00R\x05model\x88\x01\x01\x12U\n" +
@@ -13346,15 +13445,16 @@ const file_resource_proto_rawDesc = "" +
 	"\x16_halt_on_blocklist_hit\x1a>\n" +
 	"\x10RequestRejection\x12\x12\n" +
 	"\x04body\x18\x01 \x01(\fR\x04body\x12\x16\n" +
-	"\x06status\x18\x02 \x01(\rR\x06status\x1a\xfe\x04\n" +
+	"\x06status\x18\x02 \x01(\rR\x06status\x1a\xec\x05\n" +
 	"\rResponseGuard\x12^\n" +
 	"\trejection\x18\x01 \x01(\v2@.agentgateway.dev.resource.BackendPolicySpec.Ai.RequestRejectionR\trejection\x12R\n" +
 	"\x05regex\x18\x02 \x01(\v2:.agentgateway.dev.resource.BackendPolicySpec.Ai.RegexRulesH\x00R\x05regex\x12S\n" +
 	"\awebhook\x18\x03 \x01(\v27.agentgateway.dev.resource.BackendPolicySpec.Ai.WebhookH\x00R\awebhook\x12p\n" +
 	"\x12google_model_armor\x18\x04 \x01(\v2@.agentgateway.dev.resource.BackendPolicySpec.Ai.GoogleModelArmorH\x00R\x10googleModelArmor\x12r\n" +
 	"\x12bedrock_guardrails\x18\x05 \x01(\v2A.agentgateway.dev.resource.BackendPolicySpec.Ai.BedrockGuardrailsH\x00R\x11bedrockGuardrails\x12v\n" +
-	"\x14azure_content_safety\x18\x06 \x01(\v2B.agentgateway.dev.resource.BackendPolicySpec.Ai.AzureContentSafetyH\x00R\x12azureContentSafetyB\x06\n" +
-	"\x04kind\x1a\xe8\x05\n" +
+	"\x14azure_content_safety\x18\x06 \x01(\v2B.agentgateway.dev.resource.BackendPolicySpec.Ai.AzureContentSafetyH\x00R\x12azureContentSafety\x12l\n" +
+	"\x10header_redaction\x18\a \x01(\v2?.agentgateway.dev.resource.BackendPolicySpec.Ai.HeaderRedactionH\x00R\x0fheaderRedactionB\x06\n" +
+	"\x04kind\x1a\xd6\x06\n" +
 	"\fRequestGuard\x12^\n" +
 	"\trejection\x18\x01 \x01(\v2@.agentgateway.dev.resource.BackendPolicySpec.Ai.RequestRejectionR\trejection\x12R\n" +
 	"\x05regex\x18\x02 \x01(\v2:.agentgateway.dev.resource.BackendPolicySpec.Ai.RegexRulesH\x00R\x05regex\x12S\n" +
@@ -13362,7 +13462,8 @@ const file_resource_proto_rawDesc = "" +
 	"\x11openai_moderation\x18\x04 \x01(\v2:.agentgateway.dev.resource.BackendPolicySpec.Ai.ModerationH\x00R\x10openaiModeration\x12p\n" +
 	"\x12google_model_armor\x18\x05 \x01(\v2@.agentgateway.dev.resource.BackendPolicySpec.Ai.GoogleModelArmorH\x00R\x10googleModelArmor\x12r\n" +
 	"\x12bedrock_guardrails\x18\x06 \x01(\v2A.agentgateway.dev.resource.BackendPolicySpec.Ai.BedrockGuardrailsH\x00R\x11bedrockGuardrails\x12v\n" +
-	"\x14azure_content_safety\x18\a \x01(\v2B.agentgateway.dev.resource.BackendPolicySpec.Ai.AzureContentSafetyH\x00R\x12azureContentSafetyB\x06\n" +
+	"\x14azure_content_safety\x18\a \x01(\v2B.agentgateway.dev.resource.BackendPolicySpec.Ai.AzureContentSafetyH\x00R\x12azureContentSafety\x12l\n" +
+	"\x10header_redaction\x18\b \x01(\v2?.agentgateway.dev.resource.BackendPolicySpec.Ai.HeaderRedactionH\x00R\x0fheaderRedactionB\x06\n" +
 	"\x04kind\x1a\xc0\x01\n" +
 	"\vPromptGuard\x12V\n" +
 	"\arequest\x18\x01 \x03(\v2<.agentgateway.dev.resource.BackendPolicySpec.Ai.RequestGuardR\arequest\x12Y\n" +
@@ -13646,7 +13747,7 @@ func file_resource_proto_rawDescGZIP() []byte {
 }
 
 var file_resource_proto_enumTypes = make([]protoimpl.EnumInfo, 35)
-var file_resource_proto_msgTypes = make([]protoimpl.MessageInfo, 161)
+var file_resource_proto_msgTypes = make([]protoimpl.MessageInfo, 162)
 var file_resource_proto_goTypes = []any{
 	(Protocol)(0),                                               // 0: agentgateway.dev.resource.Protocol
 	(Bind_Protocol)(0),                                          // 1: agentgateway.dev.resource.Bind.Protocol
@@ -13817,39 +13918,40 @@ var file_resource_proto_goTypes = []any{
 	(*BackendPolicySpec_Ai_RegexRule)(nil),          // 166: agentgateway.dev.resource.BackendPolicySpec.Ai.RegexRule
 	(*BackendPolicySpec_Ai_RegexRules)(nil),         // 167: agentgateway.dev.resource.BackendPolicySpec.Ai.RegexRules
 	(*BackendPolicySpec_Ai_Webhook)(nil),            // 168: agentgateway.dev.resource.BackendPolicySpec.Ai.Webhook
-	(*BackendPolicySpec_Ai_Moderation)(nil),         // 169: agentgateway.dev.resource.BackendPolicySpec.Ai.Moderation
-	(*BackendPolicySpec_Ai_BedrockGuardrails)(nil),  // 170: agentgateway.dev.resource.BackendPolicySpec.Ai.BedrockGuardrails
-	(*BackendPolicySpec_Ai_GoogleModelArmor)(nil),   // 171: agentgateway.dev.resource.BackendPolicySpec.Ai.GoogleModelArmor
-	(*BackendPolicySpec_Ai_AzureContentSafety)(nil), // 172: agentgateway.dev.resource.BackendPolicySpec.Ai.AzureContentSafety
-	(*BackendPolicySpec_Ai_RequestRejection)(nil),   // 173: agentgateway.dev.resource.BackendPolicySpec.Ai.RequestRejection
-	(*BackendPolicySpec_Ai_ResponseGuard)(nil),      // 174: agentgateway.dev.resource.BackendPolicySpec.Ai.ResponseGuard
-	(*BackendPolicySpec_Ai_RequestGuard)(nil),       // 175: agentgateway.dev.resource.BackendPolicySpec.Ai.RequestGuard
-	(*BackendPolicySpec_Ai_PromptGuard)(nil),        // 176: agentgateway.dev.resource.BackendPolicySpec.Ai.PromptGuard
-	(*BackendPolicySpec_Ai_PromptCaching)(nil),      // 177: agentgateway.dev.resource.BackendPolicySpec.Ai.PromptCaching
-	nil, // 178: agentgateway.dev.resource.BackendPolicySpec.Ai.DefaultsEntry
-	nil, // 179: agentgateway.dev.resource.BackendPolicySpec.Ai.OverridesEntry
-	nil, // 180: agentgateway.dev.resource.BackendPolicySpec.Ai.TransformationsEntry
-	nil, // 181: agentgateway.dev.resource.BackendPolicySpec.Ai.ModelAliasesEntry
-	nil, // 182: agentgateway.dev.resource.BackendPolicySpec.Ai.RoutesEntry
-	(*BackendPolicySpec_McpAuthentication_ResourceMetadata)(nil), // 183: agentgateway.dev.resource.BackendPolicySpec.McpAuthentication.ResourceMetadata
-	nil,                                    // 184: agentgateway.dev.resource.BackendPolicySpec.McpAuthentication.ResourceMetadata.ExtraEntry
-	(*AIBackend_HostOverride)(nil),         // 185: agentgateway.dev.resource.AIBackend.HostOverride
-	(*AIBackend_OpenAI)(nil),               // 186: agentgateway.dev.resource.AIBackend.OpenAI
-	(*AIBackend_Gemini)(nil),               // 187: agentgateway.dev.resource.AIBackend.Gemini
-	(*AIBackend_Vertex)(nil),               // 188: agentgateway.dev.resource.AIBackend.Vertex
-	(*AIBackend_Anthropic)(nil),            // 189: agentgateway.dev.resource.AIBackend.Anthropic
-	(*AIBackend_Bedrock)(nil),              // 190: agentgateway.dev.resource.AIBackend.Bedrock
-	(*AIBackend_AzureOpenAI)(nil),          // 191: agentgateway.dev.resource.AIBackend.AzureOpenAI
-	(*AIBackend_Azure)(nil),                // 192: agentgateway.dev.resource.AIBackend.Azure
-	(*AIBackend_Provider)(nil),             // 193: agentgateway.dev.resource.AIBackend.Provider
-	(*AIBackend_ProviderGroup)(nil),        // 194: agentgateway.dev.resource.AIBackend.ProviderGroup
-	(*BackendReference_Service)(nil),       // 195: agentgateway.dev.resource.BackendReference.Service
-	(*workloadapi.Workload)(nil),           // 196: istio.workload.Workload
-	(*workloadapi.Service)(nil),            // 197: istio.workload.Service
-	(*workloadapi.NamespacedHostname)(nil), // 198: istio.workload.NamespacedHostname
-	(*durationpb.Duration)(nil),            // 199: google.protobuf.Duration
-	(*structpb.Struct)(nil),                // 200: google.protobuf.Struct
-	(*structpb.Value)(nil),                 // 201: google.protobuf.Value
+	(*BackendPolicySpec_Ai_HeaderRedaction)(nil),    // 169: agentgateway.dev.resource.BackendPolicySpec.Ai.HeaderRedaction
+	(*BackendPolicySpec_Ai_Moderation)(nil),         // 170: agentgateway.dev.resource.BackendPolicySpec.Ai.Moderation
+	(*BackendPolicySpec_Ai_BedrockGuardrails)(nil),  // 171: agentgateway.dev.resource.BackendPolicySpec.Ai.BedrockGuardrails
+	(*BackendPolicySpec_Ai_GoogleModelArmor)(nil),   // 172: agentgateway.dev.resource.BackendPolicySpec.Ai.GoogleModelArmor
+	(*BackendPolicySpec_Ai_AzureContentSafety)(nil), // 173: agentgateway.dev.resource.BackendPolicySpec.Ai.AzureContentSafety
+	(*BackendPolicySpec_Ai_RequestRejection)(nil),   // 174: agentgateway.dev.resource.BackendPolicySpec.Ai.RequestRejection
+	(*BackendPolicySpec_Ai_ResponseGuard)(nil),      // 175: agentgateway.dev.resource.BackendPolicySpec.Ai.ResponseGuard
+	(*BackendPolicySpec_Ai_RequestGuard)(nil),       // 176: agentgateway.dev.resource.BackendPolicySpec.Ai.RequestGuard
+	(*BackendPolicySpec_Ai_PromptGuard)(nil),        // 177: agentgateway.dev.resource.BackendPolicySpec.Ai.PromptGuard
+	(*BackendPolicySpec_Ai_PromptCaching)(nil),      // 178: agentgateway.dev.resource.BackendPolicySpec.Ai.PromptCaching
+	nil, // 179: agentgateway.dev.resource.BackendPolicySpec.Ai.DefaultsEntry
+	nil, // 180: agentgateway.dev.resource.BackendPolicySpec.Ai.OverridesEntry
+	nil, // 181: agentgateway.dev.resource.BackendPolicySpec.Ai.TransformationsEntry
+	nil, // 182: agentgateway.dev.resource.BackendPolicySpec.Ai.ModelAliasesEntry
+	nil, // 183: agentgateway.dev.resource.BackendPolicySpec.Ai.RoutesEntry
+	(*BackendPolicySpec_McpAuthentication_ResourceMetadata)(nil), // 184: agentgateway.dev.resource.BackendPolicySpec.McpAuthentication.ResourceMetadata
+	nil,                                    // 185: agentgateway.dev.resource.BackendPolicySpec.McpAuthentication.ResourceMetadata.ExtraEntry
+	(*AIBackend_HostOverride)(nil),         // 186: agentgateway.dev.resource.AIBackend.HostOverride
+	(*AIBackend_OpenAI)(nil),               // 187: agentgateway.dev.resource.AIBackend.OpenAI
+	(*AIBackend_Gemini)(nil),               // 188: agentgateway.dev.resource.AIBackend.Gemini
+	(*AIBackend_Vertex)(nil),               // 189: agentgateway.dev.resource.AIBackend.Vertex
+	(*AIBackend_Anthropic)(nil),            // 190: agentgateway.dev.resource.AIBackend.Anthropic
+	(*AIBackend_Bedrock)(nil),              // 191: agentgateway.dev.resource.AIBackend.Bedrock
+	(*AIBackend_AzureOpenAI)(nil),          // 192: agentgateway.dev.resource.AIBackend.AzureOpenAI
+	(*AIBackend_Azure)(nil),                // 193: agentgateway.dev.resource.AIBackend.Azure
+	(*AIBackend_Provider)(nil),             // 194: agentgateway.dev.resource.AIBackend.Provider
+	(*AIBackend_ProviderGroup)(nil),        // 195: agentgateway.dev.resource.AIBackend.ProviderGroup
+	(*BackendReference_Service)(nil),       // 196: agentgateway.dev.resource.BackendReference.Service
+	(*workloadapi.Workload)(nil),           // 197: istio.workload.Workload
+	(*workloadapi.Service)(nil),            // 198: istio.workload.Service
+	(*workloadapi.NamespacedHostname)(nil), // 199: istio.workload.NamespacedHostname
+	(*durationpb.Duration)(nil),            // 200: google.protobuf.Duration
+	(*structpb.Struct)(nil),                // 201: google.protobuf.Struct
+	(*structpb.Value)(nil),                 // 202: google.protobuf.Value
 }
 var file_resource_proto_depIdxs = []int32{
 	36,  // 0: agentgateway.dev.resource.Resource.bind:type_name -> agentgateway.dev.resource.Bind
@@ -13858,8 +13960,8 @@ var file_resource_proto_depIdxs = []int32{
 	48,  // 3: agentgateway.dev.resource.Resource.backend:type_name -> agentgateway.dev.resource.Backend
 	47,  // 4: agentgateway.dev.resource.Resource.policy:type_name -> agentgateway.dev.resource.Policy
 	44,  // 5: agentgateway.dev.resource.Resource.tcp_route:type_name -> agentgateway.dev.resource.TCPRoute
-	196, // 6: agentgateway.dev.resource.Resource.workload:type_name -> istio.workload.Workload
-	197, // 7: agentgateway.dev.resource.Resource.service:type_name -> istio.workload.Service
+	197, // 6: agentgateway.dev.resource.Resource.workload:type_name -> istio.workload.Workload
+	198, // 7: agentgateway.dev.resource.Resource.service:type_name -> istio.workload.Service
 	43,  // 8: agentgateway.dev.resource.Resource.route_group:type_name -> agentgateway.dev.resource.RouteGroup
 	1,   // 9: agentgateway.dev.resource.Bind.protocol:type_name -> agentgateway.dev.resource.Bind.Protocol
 	2,   // 10: agentgateway.dev.resource.Bind.tunnel_protocol:type_name -> agentgateway.dev.resource.Bind.TunnelProtocol
@@ -13867,12 +13969,12 @@ var file_resource_proto_depIdxs = []int32{
 	38,  // 12: agentgateway.dev.resource.Listener.name:type_name -> agentgateway.dev.resource.ListenerName
 	0,   // 13: agentgateway.dev.resource.Listener.protocol:type_name -> agentgateway.dev.resource.Protocol
 	49,  // 14: agentgateway.dev.resource.Listener.tls:type_name -> agentgateway.dev.resource.TLSConfig
-	198, // 15: agentgateway.dev.resource.Route.service_key:type_name -> istio.workload.NamespacedHostname
+	199, // 15: agentgateway.dev.resource.Route.service_key:type_name -> istio.workload.NamespacedHostname
 	37,  // 16: agentgateway.dev.resource.Route.name:type_name -> agentgateway.dev.resource.RouteName
 	67,  // 17: agentgateway.dev.resource.Route.matches:type_name -> agentgateway.dev.resource.RouteMatch
 	79,  // 18: agentgateway.dev.resource.Route.backends:type_name -> agentgateway.dev.resource.RouteBackend
 	84,  // 19: agentgateway.dev.resource.Route.traffic_policies:type_name -> agentgateway.dev.resource.TrafficPolicySpec
-	198, // 20: agentgateway.dev.resource.TCPRoute.service_key:type_name -> istio.workload.NamespacedHostname
+	199, // 20: agentgateway.dev.resource.TCPRoute.service_key:type_name -> istio.workload.NamespacedHostname
 	37,  // 21: agentgateway.dev.resource.TCPRoute.name:type_name -> agentgateway.dev.resource.RouteName
 	79,  // 22: agentgateway.dev.resource.TCPRoute.backends:type_name -> agentgateway.dev.resource.RouteBackend
 	46,  // 23: agentgateway.dev.resource.ConditionalPolicies.policies:type_name -> agentgateway.dev.resource.ConditionalPolicy
@@ -13896,9 +13998,9 @@ var file_resource_proto_depIdxs = []int32{
 	5,   // 41: agentgateway.dev.resource.TLSConfig.mtls_mode:type_name -> agentgateway.dev.resource.TLSConfig.MTLSMode
 	7,   // 42: agentgateway.dev.resource.TLSConfig.key_exchange_groups:type_name -> agentgateway.dev.resource.TLSConfig.KeyExchangeGroup
 	3,   // 43: agentgateway.dev.resource.TLSConfig.certificate_source:type_name -> agentgateway.dev.resource.TLSConfig.CertificateSource
-	199, // 44: agentgateway.dev.resource.Timeout.request:type_name -> google.protobuf.Duration
-	199, // 45: agentgateway.dev.resource.Timeout.backend_request:type_name -> google.protobuf.Duration
-	199, // 46: agentgateway.dev.resource.Retry.backoff:type_name -> google.protobuf.Duration
+	200, // 44: agentgateway.dev.resource.Timeout.request:type_name -> google.protobuf.Duration
+	200, // 45: agentgateway.dev.resource.Timeout.backend_request:type_name -> google.protobuf.Duration
+	200, // 46: agentgateway.dev.resource.Retry.backoff:type_name -> google.protobuf.Duration
 	54,  // 47: agentgateway.dev.resource.BackendAuthPolicy.passthrough:type_name -> agentgateway.dev.resource.Passthrough
 	55,  // 48: agentgateway.dev.resource.BackendAuthPolicy.key:type_name -> agentgateway.dev.resource.Key
 	56,  // 49: agentgateway.dev.resource.BackendAuthPolicy.gcp:type_name -> agentgateway.dev.resource.Gcp
@@ -13924,7 +14026,7 @@ var file_resource_proto_depIdxs = []int32{
 	71,  // 69: agentgateway.dev.resource.RouteMatch.headers:type_name -> agentgateway.dev.resource.HeaderMatch
 	70,  // 70: agentgateway.dev.resource.RouteMatch.method:type_name -> agentgateway.dev.resource.MethodMatch
 	69,  // 71: agentgateway.dev.resource.RouteMatch.query_params:type_name -> agentgateway.dev.resource.QueryMatch
-	199, // 72: agentgateway.dev.resource.CORS.max_age:type_name -> google.protobuf.Duration
+	200, // 72: agentgateway.dev.resource.CORS.max_age:type_name -> google.protobuf.Duration
 	78,  // 73: agentgateway.dev.resource.HeaderModifier.add:type_name -> agentgateway.dev.resource.Header
 	78,  // 74: agentgateway.dev.resource.HeaderModifier.set:type_name -> agentgateway.dev.resource.Header
 	101, // 75: agentgateway.dev.resource.RequestMirrors.mirrors:type_name -> agentgateway.dev.resource.RequestMirrors.Mirror
@@ -13935,8 +14037,8 @@ var file_resource_proto_depIdxs = []int32{
 	103, // 80: agentgateway.dev.resource.PolicyTarget.backend:type_name -> agentgateway.dev.resource.PolicyTarget.BackendTarget
 	102, // 81: agentgateway.dev.resource.PolicyTarget.service:type_name -> agentgateway.dev.resource.PolicyTarget.ServiceTarget
 	106, // 82: agentgateway.dev.resource.PolicyTarget.listener_set:type_name -> agentgateway.dev.resource.PolicyTarget.ListenerSetTarget
-	199, // 83: agentgateway.dev.resource.KeepaliveConfig.time:type_name -> google.protobuf.Duration
-	199, // 84: agentgateway.dev.resource.KeepaliveConfig.interval:type_name -> google.protobuf.Duration
+	200, // 83: agentgateway.dev.resource.KeepaliveConfig.time:type_name -> google.protobuf.Duration
+	200, // 84: agentgateway.dev.resource.KeepaliveConfig.interval:type_name -> google.protobuf.Duration
 	109, // 85: agentgateway.dev.resource.FrontendPolicySpec.tcp:type_name -> agentgateway.dev.resource.FrontendPolicySpec.TCP
 	108, // 86: agentgateway.dev.resource.FrontendPolicySpec.tls:type_name -> agentgateway.dev.resource.FrontendPolicySpec.TLS
 	107, // 87: agentgateway.dev.resource.FrontendPolicySpec.http:type_name -> agentgateway.dev.resource.FrontendPolicySpec.HTTP
@@ -13983,20 +14085,20 @@ var file_resource_proto_depIdxs = []int32{
 	157, // 128: agentgateway.dev.resource.BackendPolicySpec.health:type_name -> agentgateway.dev.resource.BackendPolicySpec.Health
 	160, // 129: agentgateway.dev.resource.BackendPolicySpec.backend_tunnel:type_name -> agentgateway.dev.resource.BackendPolicySpec.BackendTunnel
 	89,  // 130: agentgateway.dev.resource.AwsBackend.agent_core:type_name -> agentgateway.dev.resource.AwsAgentCoreBackend
-	194, // 131: agentgateway.dev.resource.AIBackend.provider_groups:type_name -> agentgateway.dev.resource.AIBackend.ProviderGroup
+	195, // 131: agentgateway.dev.resource.AIBackend.provider_groups:type_name -> agentgateway.dev.resource.AIBackend.ProviderGroup
 	92,  // 132: agentgateway.dev.resource.MCPBackend.targets:type_name -> agentgateway.dev.resource.MCPTarget
 	31,  // 133: agentgateway.dev.resource.MCPBackend.stateful_mode:type_name -> agentgateway.dev.resource.MCPBackend.StatefulMode
 	32,  // 134: agentgateway.dev.resource.MCPBackend.prefix_mode:type_name -> agentgateway.dev.resource.MCPBackend.PrefixMode
 	33,  // 135: agentgateway.dev.resource.MCPBackend.failure_mode:type_name -> agentgateway.dev.resource.MCPBackend.FailureMode
 	93,  // 136: agentgateway.dev.resource.MCPTarget.backend:type_name -> agentgateway.dev.resource.BackendReference
 	34,  // 137: agentgateway.dev.resource.MCPTarget.protocol:type_name -> agentgateway.dev.resource.MCPTarget.Protocol
-	195, // 138: agentgateway.dev.resource.BackendReference.service:type_name -> agentgateway.dev.resource.BackendReference.Service
+	196, // 138: agentgateway.dev.resource.BackendReference.service:type_name -> agentgateway.dev.resource.BackendReference.Service
 	93,  // 139: agentgateway.dev.resource.RequestMirrors.Mirror.backend:type_name -> agentgateway.dev.resource.BackendReference
-	199, // 140: agentgateway.dev.resource.FrontendPolicySpec.HTTP.http1_idle_timeout:type_name -> google.protobuf.Duration
-	199, // 141: agentgateway.dev.resource.FrontendPolicySpec.HTTP.http2_keepalive_interval:type_name -> google.protobuf.Duration
-	199, // 142: agentgateway.dev.resource.FrontendPolicySpec.HTTP.http2_keepalive_timeout:type_name -> google.protobuf.Duration
-	199, // 143: agentgateway.dev.resource.FrontendPolicySpec.HTTP.max_connection_duration:type_name -> google.protobuf.Duration
-	199, // 144: agentgateway.dev.resource.FrontendPolicySpec.TLS.handshake_timeout:type_name -> google.protobuf.Duration
+	200, // 140: agentgateway.dev.resource.FrontendPolicySpec.HTTP.http1_idle_timeout:type_name -> google.protobuf.Duration
+	200, // 141: agentgateway.dev.resource.FrontendPolicySpec.HTTP.http2_keepalive_interval:type_name -> google.protobuf.Duration
+	200, // 142: agentgateway.dev.resource.FrontendPolicySpec.HTTP.http2_keepalive_timeout:type_name -> google.protobuf.Duration
+	200, // 143: agentgateway.dev.resource.FrontendPolicySpec.HTTP.max_connection_duration:type_name -> google.protobuf.Duration
+	200, // 144: agentgateway.dev.resource.FrontendPolicySpec.TLS.handshake_timeout:type_name -> google.protobuf.Duration
 	94,  // 145: agentgateway.dev.resource.FrontendPolicySpec.TLS.alpn:type_name -> agentgateway.dev.resource.Alpn
 	6,   // 146: agentgateway.dev.resource.FrontendPolicySpec.TLS.cipher_suites:type_name -> agentgateway.dev.resource.TLSConfig.CipherSuite
 	4,   // 147: agentgateway.dev.resource.FrontendPolicySpec.TLS.min_version:type_name -> agentgateway.dev.resource.TLSConfig.TLSVersion
@@ -14020,7 +14122,7 @@ var file_resource_proto_depIdxs = []int32{
 	135, // 165: agentgateway.dev.resource.TrafficPolicySpec.RemoteRateLimit.descriptors:type_name -> agentgateway.dev.resource.TrafficPolicySpec.RemoteRateLimit.Descriptor
 	93,  // 166: agentgateway.dev.resource.TrafficPolicySpec.RemoteRateLimit.target:type_name -> agentgateway.dev.resource.BackendReference
 	14,  // 167: agentgateway.dev.resource.TrafficPolicySpec.RemoteRateLimit.failure_mode:type_name -> agentgateway.dev.resource.TrafficPolicySpec.RemoteRateLimit.FailureMode
-	199, // 168: agentgateway.dev.resource.TrafficPolicySpec.LocalRateLimit.fill_interval:type_name -> google.protobuf.Duration
+	200, // 168: agentgateway.dev.resource.TrafficPolicySpec.LocalRateLimit.fill_interval:type_name -> google.protobuf.Duration
 	15,  // 169: agentgateway.dev.resource.TrafficPolicySpec.LocalRateLimit.type:type_name -> agentgateway.dev.resource.TrafficPolicySpec.LocalRateLimit.Type
 	93,  // 170: agentgateway.dev.resource.TrafficPolicySpec.ExternalAuth.target:type_name -> agentgateway.dev.resource.BackendReference
 	138, // 171: agentgateway.dev.resource.TrafficPolicySpec.ExternalAuth.grpc:type_name -> agentgateway.dev.resource.TrafficPolicySpec.ExternalAuth.GRPCProtocol
@@ -14052,36 +14154,36 @@ var file_resource_proto_depIdxs = []int32{
 	142, // 197: agentgateway.dev.resource.TrafficPolicySpec.ExternalAuth.HTTPProtocol.add_request_headers:type_name -> agentgateway.dev.resource.TrafficPolicySpec.ExternalAuth.HTTPProtocol.AddRequestHeadersEntry
 	143, // 198: agentgateway.dev.resource.TrafficPolicySpec.ExternalAuth.HTTPProtocol.metadata:type_name -> agentgateway.dev.resource.TrafficPolicySpec.ExternalAuth.HTTPProtocol.MetadataEntry
 	28,  // 199: agentgateway.dev.resource.TrafficPolicySpec.JWT.MCP.provider:type_name -> agentgateway.dev.resource.BackendPolicySpec.McpAuthentication.McpIDP
-	183, // 200: agentgateway.dev.resource.TrafficPolicySpec.JWT.MCP.resource_metadata:type_name -> agentgateway.dev.resource.BackendPolicySpec.McpAuthentication.ResourceMetadata
-	200, // 201: agentgateway.dev.resource.TrafficPolicySpec.APIKey.User.metadata:type_name -> google.protobuf.Struct
+	184, // 200: agentgateway.dev.resource.TrafficPolicySpec.JWT.MCP.resource_metadata:type_name -> agentgateway.dev.resource.BackendPolicySpec.McpAuthentication.ResourceMetadata
+	201, // 201: agentgateway.dev.resource.TrafficPolicySpec.APIKey.User.metadata:type_name -> google.protobuf.Struct
 	130, // 202: agentgateway.dev.resource.TrafficPolicySpec.TransformationPolicy.Transform.set:type_name -> agentgateway.dev.resource.TrafficPolicySpec.HeaderTransformation
 	130, // 203: agentgateway.dev.resource.TrafficPolicySpec.TransformationPolicy.Transform.add:type_name -> agentgateway.dev.resource.TrafficPolicySpec.HeaderTransformation
 	131, // 204: agentgateway.dev.resource.TrafficPolicySpec.TransformationPolicy.Transform.body:type_name -> agentgateway.dev.resource.TrafficPolicySpec.BodyTransformation
 	147, // 205: agentgateway.dev.resource.TrafficPolicySpec.TransformationPolicy.Transform.metadata:type_name -> agentgateway.dev.resource.TrafficPolicySpec.TransformationPolicy.Transform.MetadataEntry
 	152, // 206: agentgateway.dev.resource.TrafficPolicySpec.ExtProc.NamespacedMetadataContext.context:type_name -> agentgateway.dev.resource.TrafficPolicySpec.ExtProc.NamespacedMetadataContext.ContextEntry
 	148, // 207: agentgateway.dev.resource.TrafficPolicySpec.ExtProc.MetadataContextEntry.value:type_name -> agentgateway.dev.resource.TrafficPolicySpec.ExtProc.NamespacedMetadataContext
-	176, // 208: agentgateway.dev.resource.BackendPolicySpec.Ai.prompt_guard:type_name -> agentgateway.dev.resource.BackendPolicySpec.Ai.PromptGuard
-	178, // 209: agentgateway.dev.resource.BackendPolicySpec.Ai.defaults:type_name -> agentgateway.dev.resource.BackendPolicySpec.Ai.DefaultsEntry
-	179, // 210: agentgateway.dev.resource.BackendPolicySpec.Ai.overrides:type_name -> agentgateway.dev.resource.BackendPolicySpec.Ai.OverridesEntry
-	180, // 211: agentgateway.dev.resource.BackendPolicySpec.Ai.transformations:type_name -> agentgateway.dev.resource.BackendPolicySpec.Ai.TransformationsEntry
+	177, // 208: agentgateway.dev.resource.BackendPolicySpec.Ai.prompt_guard:type_name -> agentgateway.dev.resource.BackendPolicySpec.Ai.PromptGuard
+	179, // 209: agentgateway.dev.resource.BackendPolicySpec.Ai.defaults:type_name -> agentgateway.dev.resource.BackendPolicySpec.Ai.DefaultsEntry
+	180, // 210: agentgateway.dev.resource.BackendPolicySpec.Ai.overrides:type_name -> agentgateway.dev.resource.BackendPolicySpec.Ai.OverridesEntry
+	181, // 211: agentgateway.dev.resource.BackendPolicySpec.Ai.transformations:type_name -> agentgateway.dev.resource.BackendPolicySpec.Ai.TransformationsEntry
 	165, // 212: agentgateway.dev.resource.BackendPolicySpec.Ai.prompts:type_name -> agentgateway.dev.resource.BackendPolicySpec.Ai.PromptEnrichment
-	181, // 213: agentgateway.dev.resource.BackendPolicySpec.Ai.model_aliases:type_name -> agentgateway.dev.resource.BackendPolicySpec.Ai.ModelAliasesEntry
-	177, // 214: agentgateway.dev.resource.BackendPolicySpec.Ai.prompt_caching:type_name -> agentgateway.dev.resource.BackendPolicySpec.Ai.PromptCaching
-	182, // 215: agentgateway.dev.resource.BackendPolicySpec.Ai.routes:type_name -> agentgateway.dev.resource.BackendPolicySpec.Ai.RoutesEntry
+	182, // 213: agentgateway.dev.resource.BackendPolicySpec.Ai.model_aliases:type_name -> agentgateway.dev.resource.BackendPolicySpec.Ai.ModelAliasesEntry
+	178, // 214: agentgateway.dev.resource.BackendPolicySpec.Ai.prompt_caching:type_name -> agentgateway.dev.resource.BackendPolicySpec.Ai.PromptCaching
+	183, // 215: agentgateway.dev.resource.BackendPolicySpec.Ai.routes:type_name -> agentgateway.dev.resource.BackendPolicySpec.Ai.RoutesEntry
 	93,  // 216: agentgateway.dev.resource.BackendPolicySpec.InferenceRouting.endpoint_picker:type_name -> agentgateway.dev.resource.BackendReference
 	25,  // 217: agentgateway.dev.resource.BackendPolicySpec.InferenceRouting.failure_mode:type_name -> agentgateway.dev.resource.BackendPolicySpec.InferenceRouting.FailureMode
-	199, // 218: agentgateway.dev.resource.BackendPolicySpec.Eviction.duration:type_name -> google.protobuf.Duration
+	200, // 218: agentgateway.dev.resource.BackendPolicySpec.Eviction.duration:type_name -> google.protobuf.Duration
 	156, // 219: agentgateway.dev.resource.BackendPolicySpec.Health.eviction:type_name -> agentgateway.dev.resource.BackendPolicySpec.Eviction
 	26,  // 220: agentgateway.dev.resource.BackendPolicySpec.BackendTLS.verification:type_name -> agentgateway.dev.resource.BackendPolicySpec.BackendTLS.VerificationMode
 	94,  // 221: agentgateway.dev.resource.BackendPolicySpec.BackendTLS.alpn:type_name -> agentgateway.dev.resource.Alpn
 	7,   // 222: agentgateway.dev.resource.BackendPolicySpec.BackendTLS.key_exchange_groups:type_name -> agentgateway.dev.resource.TLSConfig.KeyExchangeGroup
 	27,  // 223: agentgateway.dev.resource.BackendPolicySpec.BackendHTTP.version:type_name -> agentgateway.dev.resource.BackendPolicySpec.BackendHTTP.HttpVersion
-	199, // 224: agentgateway.dev.resource.BackendPolicySpec.BackendHTTP.request_timeout:type_name -> google.protobuf.Duration
+	200, // 224: agentgateway.dev.resource.BackendPolicySpec.BackendHTTP.request_timeout:type_name -> google.protobuf.Duration
 	93,  // 225: agentgateway.dev.resource.BackendPolicySpec.BackendTunnel.proxy:type_name -> agentgateway.dev.resource.BackendReference
 	81,  // 226: agentgateway.dev.resource.BackendPolicySpec.BackendTCP.keepalive:type_name -> agentgateway.dev.resource.KeepaliveConfig
-	199, // 227: agentgateway.dev.resource.BackendPolicySpec.BackendTCP.connect_timeout:type_name -> google.protobuf.Duration
+	200, // 227: agentgateway.dev.resource.BackendPolicySpec.BackendTCP.connect_timeout:type_name -> google.protobuf.Duration
 	28,  // 228: agentgateway.dev.resource.BackendPolicySpec.McpAuthentication.provider:type_name -> agentgateway.dev.resource.BackendPolicySpec.McpAuthentication.McpIDP
-	183, // 229: agentgateway.dev.resource.BackendPolicySpec.McpAuthentication.resource_metadata:type_name -> agentgateway.dev.resource.BackendPolicySpec.McpAuthentication.ResourceMetadata
+	184, // 229: agentgateway.dev.resource.BackendPolicySpec.McpAuthentication.resource_metadata:type_name -> agentgateway.dev.resource.BackendPolicySpec.McpAuthentication.ResourceMetadata
 	29,  // 230: agentgateway.dev.resource.BackendPolicySpec.McpAuthentication.mode:type_name -> agentgateway.dev.resource.BackendPolicySpec.McpAuthentication.Mode
 	83,  // 231: agentgateway.dev.resource.BackendPolicySpec.McpAuthentication.jwt_validation_options:type_name -> agentgateway.dev.resource.JWTValidationOptions
 	53,  // 232: agentgateway.dev.resource.BackendPolicySpec.McpAuthentication.authorization_location:type_name -> agentgateway.dev.resource.AuthorizationLocation
@@ -14096,40 +14198,42 @@ var file_resource_proto_depIdxs = []int32{
 	85,  // 241: agentgateway.dev.resource.BackendPolicySpec.Ai.BedrockGuardrails.inline_policies:type_name -> agentgateway.dev.resource.BackendPolicySpec
 	85,  // 242: agentgateway.dev.resource.BackendPolicySpec.Ai.GoogleModelArmor.inline_policies:type_name -> agentgateway.dev.resource.BackendPolicySpec
 	85,  // 243: agentgateway.dev.resource.BackendPolicySpec.Ai.AzureContentSafety.inline_policies:type_name -> agentgateway.dev.resource.BackendPolicySpec
-	173, // 244: agentgateway.dev.resource.BackendPolicySpec.Ai.ResponseGuard.rejection:type_name -> agentgateway.dev.resource.BackendPolicySpec.Ai.RequestRejection
+	174, // 244: agentgateway.dev.resource.BackendPolicySpec.Ai.ResponseGuard.rejection:type_name -> agentgateway.dev.resource.BackendPolicySpec.Ai.RequestRejection
 	167, // 245: agentgateway.dev.resource.BackendPolicySpec.Ai.ResponseGuard.regex:type_name -> agentgateway.dev.resource.BackendPolicySpec.Ai.RegexRules
 	168, // 246: agentgateway.dev.resource.BackendPolicySpec.Ai.ResponseGuard.webhook:type_name -> agentgateway.dev.resource.BackendPolicySpec.Ai.Webhook
-	171, // 247: agentgateway.dev.resource.BackendPolicySpec.Ai.ResponseGuard.google_model_armor:type_name -> agentgateway.dev.resource.BackendPolicySpec.Ai.GoogleModelArmor
-	170, // 248: agentgateway.dev.resource.BackendPolicySpec.Ai.ResponseGuard.bedrock_guardrails:type_name -> agentgateway.dev.resource.BackendPolicySpec.Ai.BedrockGuardrails
-	172, // 249: agentgateway.dev.resource.BackendPolicySpec.Ai.ResponseGuard.azure_content_safety:type_name -> agentgateway.dev.resource.BackendPolicySpec.Ai.AzureContentSafety
-	173, // 250: agentgateway.dev.resource.BackendPolicySpec.Ai.RequestGuard.rejection:type_name -> agentgateway.dev.resource.BackendPolicySpec.Ai.RequestRejection
-	167, // 251: agentgateway.dev.resource.BackendPolicySpec.Ai.RequestGuard.regex:type_name -> agentgateway.dev.resource.BackendPolicySpec.Ai.RegexRules
-	168, // 252: agentgateway.dev.resource.BackendPolicySpec.Ai.RequestGuard.webhook:type_name -> agentgateway.dev.resource.BackendPolicySpec.Ai.Webhook
-	169, // 253: agentgateway.dev.resource.BackendPolicySpec.Ai.RequestGuard.openai_moderation:type_name -> agentgateway.dev.resource.BackendPolicySpec.Ai.Moderation
-	171, // 254: agentgateway.dev.resource.BackendPolicySpec.Ai.RequestGuard.google_model_armor:type_name -> agentgateway.dev.resource.BackendPolicySpec.Ai.GoogleModelArmor
-	170, // 255: agentgateway.dev.resource.BackendPolicySpec.Ai.RequestGuard.bedrock_guardrails:type_name -> agentgateway.dev.resource.BackendPolicySpec.Ai.BedrockGuardrails
-	172, // 256: agentgateway.dev.resource.BackendPolicySpec.Ai.RequestGuard.azure_content_safety:type_name -> agentgateway.dev.resource.BackendPolicySpec.Ai.AzureContentSafety
-	175, // 257: agentgateway.dev.resource.BackendPolicySpec.Ai.PromptGuard.request:type_name -> agentgateway.dev.resource.BackendPolicySpec.Ai.RequestGuard
-	174, // 258: agentgateway.dev.resource.BackendPolicySpec.Ai.PromptGuard.response:type_name -> agentgateway.dev.resource.BackendPolicySpec.Ai.ResponseGuard
-	24,  // 259: agentgateway.dev.resource.BackendPolicySpec.Ai.RoutesEntry.value:type_name -> agentgateway.dev.resource.BackendPolicySpec.Ai.RouteType
-	184, // 260: agentgateway.dev.resource.BackendPolicySpec.McpAuthentication.ResourceMetadata.extra:type_name -> agentgateway.dev.resource.BackendPolicySpec.McpAuthentication.ResourceMetadata.ExtraEntry
-	201, // 261: agentgateway.dev.resource.BackendPolicySpec.McpAuthentication.ResourceMetadata.ExtraEntry.value:type_name -> google.protobuf.Value
-	30,  // 262: agentgateway.dev.resource.AIBackend.Azure.resource_type:type_name -> agentgateway.dev.resource.AIBackend.AzureResourceType
-	185, // 263: agentgateway.dev.resource.AIBackend.Provider.host_override:type_name -> agentgateway.dev.resource.AIBackend.HostOverride
-	186, // 264: agentgateway.dev.resource.AIBackend.Provider.openai:type_name -> agentgateway.dev.resource.AIBackend.OpenAI
-	187, // 265: agentgateway.dev.resource.AIBackend.Provider.gemini:type_name -> agentgateway.dev.resource.AIBackend.Gemini
-	188, // 266: agentgateway.dev.resource.AIBackend.Provider.vertex:type_name -> agentgateway.dev.resource.AIBackend.Vertex
-	189, // 267: agentgateway.dev.resource.AIBackend.Provider.anthropic:type_name -> agentgateway.dev.resource.AIBackend.Anthropic
-	190, // 268: agentgateway.dev.resource.AIBackend.Provider.bedrock:type_name -> agentgateway.dev.resource.AIBackend.Bedrock
-	191, // 269: agentgateway.dev.resource.AIBackend.Provider.azureopenai:type_name -> agentgateway.dev.resource.AIBackend.AzureOpenAI
-	192, // 270: agentgateway.dev.resource.AIBackend.Provider.azure:type_name -> agentgateway.dev.resource.AIBackend.Azure
-	85,  // 271: agentgateway.dev.resource.AIBackend.Provider.inline_policies:type_name -> agentgateway.dev.resource.BackendPolicySpec
-	193, // 272: agentgateway.dev.resource.AIBackend.ProviderGroup.providers:type_name -> agentgateway.dev.resource.AIBackend.Provider
-	273, // [273:273] is the sub-list for method output_type
-	273, // [273:273] is the sub-list for method input_type
-	273, // [273:273] is the sub-list for extension type_name
-	273, // [273:273] is the sub-list for extension extendee
-	0,   // [0:273] is the sub-list for field type_name
+	172, // 247: agentgateway.dev.resource.BackendPolicySpec.Ai.ResponseGuard.google_model_armor:type_name -> agentgateway.dev.resource.BackendPolicySpec.Ai.GoogleModelArmor
+	171, // 248: agentgateway.dev.resource.BackendPolicySpec.Ai.ResponseGuard.bedrock_guardrails:type_name -> agentgateway.dev.resource.BackendPolicySpec.Ai.BedrockGuardrails
+	173, // 249: agentgateway.dev.resource.BackendPolicySpec.Ai.ResponseGuard.azure_content_safety:type_name -> agentgateway.dev.resource.BackendPolicySpec.Ai.AzureContentSafety
+	169, // 250: agentgateway.dev.resource.BackendPolicySpec.Ai.ResponseGuard.header_redaction:type_name -> agentgateway.dev.resource.BackendPolicySpec.Ai.HeaderRedaction
+	174, // 251: agentgateway.dev.resource.BackendPolicySpec.Ai.RequestGuard.rejection:type_name -> agentgateway.dev.resource.BackendPolicySpec.Ai.RequestRejection
+	167, // 252: agentgateway.dev.resource.BackendPolicySpec.Ai.RequestGuard.regex:type_name -> agentgateway.dev.resource.BackendPolicySpec.Ai.RegexRules
+	168, // 253: agentgateway.dev.resource.BackendPolicySpec.Ai.RequestGuard.webhook:type_name -> agentgateway.dev.resource.BackendPolicySpec.Ai.Webhook
+	170, // 254: agentgateway.dev.resource.BackendPolicySpec.Ai.RequestGuard.openai_moderation:type_name -> agentgateway.dev.resource.BackendPolicySpec.Ai.Moderation
+	172, // 255: agentgateway.dev.resource.BackendPolicySpec.Ai.RequestGuard.google_model_armor:type_name -> agentgateway.dev.resource.BackendPolicySpec.Ai.GoogleModelArmor
+	171, // 256: agentgateway.dev.resource.BackendPolicySpec.Ai.RequestGuard.bedrock_guardrails:type_name -> agentgateway.dev.resource.BackendPolicySpec.Ai.BedrockGuardrails
+	173, // 257: agentgateway.dev.resource.BackendPolicySpec.Ai.RequestGuard.azure_content_safety:type_name -> agentgateway.dev.resource.BackendPolicySpec.Ai.AzureContentSafety
+	169, // 258: agentgateway.dev.resource.BackendPolicySpec.Ai.RequestGuard.header_redaction:type_name -> agentgateway.dev.resource.BackendPolicySpec.Ai.HeaderRedaction
+	176, // 259: agentgateway.dev.resource.BackendPolicySpec.Ai.PromptGuard.request:type_name -> agentgateway.dev.resource.BackendPolicySpec.Ai.RequestGuard
+	175, // 260: agentgateway.dev.resource.BackendPolicySpec.Ai.PromptGuard.response:type_name -> agentgateway.dev.resource.BackendPolicySpec.Ai.ResponseGuard
+	24,  // 261: agentgateway.dev.resource.BackendPolicySpec.Ai.RoutesEntry.value:type_name -> agentgateway.dev.resource.BackendPolicySpec.Ai.RouteType
+	185, // 262: agentgateway.dev.resource.BackendPolicySpec.McpAuthentication.ResourceMetadata.extra:type_name -> agentgateway.dev.resource.BackendPolicySpec.McpAuthentication.ResourceMetadata.ExtraEntry
+	202, // 263: agentgateway.dev.resource.BackendPolicySpec.McpAuthentication.ResourceMetadata.ExtraEntry.value:type_name -> google.protobuf.Value
+	30,  // 264: agentgateway.dev.resource.AIBackend.Azure.resource_type:type_name -> agentgateway.dev.resource.AIBackend.AzureResourceType
+	186, // 265: agentgateway.dev.resource.AIBackend.Provider.host_override:type_name -> agentgateway.dev.resource.AIBackend.HostOverride
+	187, // 266: agentgateway.dev.resource.AIBackend.Provider.openai:type_name -> agentgateway.dev.resource.AIBackend.OpenAI
+	188, // 267: agentgateway.dev.resource.AIBackend.Provider.gemini:type_name -> agentgateway.dev.resource.AIBackend.Gemini
+	189, // 268: agentgateway.dev.resource.AIBackend.Provider.vertex:type_name -> agentgateway.dev.resource.AIBackend.Vertex
+	190, // 269: agentgateway.dev.resource.AIBackend.Provider.anthropic:type_name -> agentgateway.dev.resource.AIBackend.Anthropic
+	191, // 270: agentgateway.dev.resource.AIBackend.Provider.bedrock:type_name -> agentgateway.dev.resource.AIBackend.Bedrock
+	192, // 271: agentgateway.dev.resource.AIBackend.Provider.azureopenai:type_name -> agentgateway.dev.resource.AIBackend.AzureOpenAI
+	193, // 272: agentgateway.dev.resource.AIBackend.Provider.azure:type_name -> agentgateway.dev.resource.AIBackend.Azure
+	85,  // 273: agentgateway.dev.resource.AIBackend.Provider.inline_policies:type_name -> agentgateway.dev.resource.BackendPolicySpec
+	194, // 274: agentgateway.dev.resource.AIBackend.ProviderGroup.providers:type_name -> agentgateway.dev.resource.AIBackend.Provider
+	275, // [275:275] is the sub-list for method output_type
+	275, // [275:275] is the sub-list for method input_type
+	275, // [275:275] is the sub-list for extension type_name
+	275, // [275:275] is the sub-list for extension extendee
+	0,   // [0:275] is the sub-list for field type_name
 }
 
 func init() { file_resource_proto_init() }
@@ -14320,33 +14424,35 @@ func file_resource_proto_init() {
 		(*BackendPolicySpec_Ai_RegexRule_Builtin)(nil),
 		(*BackendPolicySpec_Ai_RegexRule_Regex)(nil),
 	}
-	file_resource_proto_msgTypes[134].OneofWrappers = []any{}
-	file_resource_proto_msgTypes[136].OneofWrappers = []any{}
+	file_resource_proto_msgTypes[135].OneofWrappers = []any{}
 	file_resource_proto_msgTypes[137].OneofWrappers = []any{}
-	file_resource_proto_msgTypes[139].OneofWrappers = []any{
+	file_resource_proto_msgTypes[138].OneofWrappers = []any{}
+	file_resource_proto_msgTypes[140].OneofWrappers = []any{
 		(*BackendPolicySpec_Ai_ResponseGuard_Regex)(nil),
 		(*BackendPolicySpec_Ai_ResponseGuard_Webhook)(nil),
 		(*BackendPolicySpec_Ai_ResponseGuard_GoogleModelArmor)(nil),
 		(*BackendPolicySpec_Ai_ResponseGuard_BedrockGuardrails)(nil),
 		(*BackendPolicySpec_Ai_ResponseGuard_AzureContentSafety)(nil),
+		(*BackendPolicySpec_Ai_ResponseGuard_HeaderRedaction)(nil),
 	}
-	file_resource_proto_msgTypes[140].OneofWrappers = []any{
+	file_resource_proto_msgTypes[141].OneofWrappers = []any{
 		(*BackendPolicySpec_Ai_RequestGuard_Regex)(nil),
 		(*BackendPolicySpec_Ai_RequestGuard_Webhook)(nil),
 		(*BackendPolicySpec_Ai_RequestGuard_OpenaiModeration)(nil),
 		(*BackendPolicySpec_Ai_RequestGuard_GoogleModelArmor)(nil),
 		(*BackendPolicySpec_Ai_RequestGuard_BedrockGuardrails)(nil),
 		(*BackendPolicySpec_Ai_RequestGuard_AzureContentSafety)(nil),
+		(*BackendPolicySpec_Ai_RequestGuard_HeaderRedaction)(nil),
 	}
-	file_resource_proto_msgTypes[142].OneofWrappers = []any{}
-	file_resource_proto_msgTypes[151].OneofWrappers = []any{}
+	file_resource_proto_msgTypes[143].OneofWrappers = []any{}
 	file_resource_proto_msgTypes[152].OneofWrappers = []any{}
 	file_resource_proto_msgTypes[153].OneofWrappers = []any{}
 	file_resource_proto_msgTypes[154].OneofWrappers = []any{}
 	file_resource_proto_msgTypes[155].OneofWrappers = []any{}
 	file_resource_proto_msgTypes[156].OneofWrappers = []any{}
 	file_resource_proto_msgTypes[157].OneofWrappers = []any{}
-	file_resource_proto_msgTypes[158].OneofWrappers = []any{
+	file_resource_proto_msgTypes[158].OneofWrappers = []any{}
+	file_resource_proto_msgTypes[159].OneofWrappers = []any{
 		(*AIBackend_Provider_Openai)(nil),
 		(*AIBackend_Provider_Gemini)(nil),
 		(*AIBackend_Provider_Vertex)(nil),
@@ -14361,7 +14467,7 @@ func file_resource_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_resource_proto_rawDesc), len(file_resource_proto_rawDesc)),
 			NumEnums:      35,
-			NumMessages:   161,
+			NumMessages:   162,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

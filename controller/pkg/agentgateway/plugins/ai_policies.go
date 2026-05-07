@@ -27,6 +27,10 @@ func processRequestGuard(ctx PolicyCtx, namespace string, reqs []agentgateway.Pr
 			pgReq.Kind = &api.BackendPolicySpec_Ai_RequestGuard_Regex{
 				Regex: processRegex(req.Regex),
 			}
+		} else if req.HeaderRedaction != nil {
+			pgReq.Kind = &api.BackendPolicySpec_Ai_RequestGuard_HeaderRedaction{
+				HeaderRedaction: processHeaderRedaction(req.HeaderRedaction),
+			}
 		} else if req.OpenAIModeration != nil {
 			pgReq.Kind = &api.BackendPolicySpec_Ai_RequestGuard_OpenaiModeration{
 				OpenaiModeration: processModeration(ctx, namespace, req.OpenAIModeration),
@@ -68,6 +72,10 @@ func processResponseGuard(ctx PolicyCtx, namespace string, resps []agentgateway.
 		} else if req.Regex != nil {
 			pgReq.Kind = &api.BackendPolicySpec_Ai_ResponseGuard_Regex{
 				Regex: processRegex(req.Regex),
+			}
+		} else if req.HeaderRedaction != nil {
+			pgReq.Kind = &api.BackendPolicySpec_Ai_ResponseGuard_HeaderRedaction{
+				HeaderRedaction: processHeaderRedaction(req.HeaderRedaction),
 			}
 		} else if req.BedrockGuardrails != nil {
 			pgReq.Kind = &api.BackendPolicySpec_Ai_ResponseGuard_BedrockGuardrails{
@@ -111,6 +119,27 @@ func processPromptEnrichment(enrichment *agentgateway.AIPromptEnrichment) *api.B
 	}
 
 	return pgPromptEnrichment
+}
+
+// processHeaderRedaction translates a CRD HeaderRedaction into its protobuf
+// counterpart, applying defaults so the Rust gateway sees consistent values
+// even when the user omitted optional fields.
+func processHeaderRedaction(hr *agentgateway.HeaderRedaction) *api.BackendPolicySpec_Ai_HeaderRedaction {
+	if hr == nil {
+		return nil
+	}
+	prefix := hr.HeaderPrefix
+	if prefix == "" {
+		prefix = "x-redact-"
+	}
+	format := hr.TokenFormat
+	if format == "" {
+		format = "[{NAME}]"
+	}
+	return &api.BackendPolicySpec_Ai_HeaderRedaction{
+		HeaderPrefix: prefix,
+		TokenFormat:  format,
+	}
 }
 
 func processWebhook(ctx PolicyCtx, namespace string, webhook *agentgateway.Webhook) (*api.BackendPolicySpec_Ai_Webhook, error) {

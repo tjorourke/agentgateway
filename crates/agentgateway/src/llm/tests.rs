@@ -986,6 +986,7 @@ async fn process_response_routes_streaming_error_to_buffered_path() {
 			LLMResponsePolicies::default(),
 			AsyncLog::default(),
 			false,
+			::http::HeaderMap::new(),
 			resp,
 		)
 		.await

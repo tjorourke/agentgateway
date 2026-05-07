@@ -136,6 +136,34 @@ type Webhook struct {
 	ForwardHeaderMatches []gwv1.HTTPHeaderMatch `json:"forwardHeaderMatches,omitempty"`
 }
 
+// HeaderRedaction performs symmetric in-process redaction of LLM prompt and
+// response content driven by HTTP headers attached to the original client
+// request. Headers whose name starts with `headerPrefix` (default `x-redact-`)
+// are read; their values are replaced inside `messages[].content` with a
+// token derived from `tokenFormat` (default `[{NAME}]`, where `{NAME}` is the
+// uppercased suffix of the header name).
+//
+// On the response phase, the inverse substitution restores the original
+// values in `choices[].message.content` using the same client request headers.
+//
+// Use this for dynamic, per-request PII redaction that cannot be expressed
+// with static regex (e.g. user-specific names, IDs) without operating a
+// stateful webhook.
+type HeaderRedaction struct {
+	// HeaderPrefix selects which client request headers carry redaction
+	// values. Matching is case-insensitive. Defaults to `x-redact-`.
+	// +kubebuilder:default="x-redact-"
+	// +optional
+	HeaderPrefix string `json:"headerPrefix,omitempty"`
+
+	// TokenFormat is the substitution token template. The literal `{NAME}` is
+	// replaced with the uppercased suffix of the matched header name.
+	// Defaults to `[{NAME}]`.
+	// +kubebuilder:default="[{NAME}]"
+	// +optional
+	TokenFormat string `json:"tokenFormat,omitempty"`
+}
+
 // CustomResponse configures a response to return to the client if request content
 // is matched against a regex pattern and the action is `REJECT`.
 // +kubebuilder:validation:AtLeastOneFieldSet
@@ -207,7 +235,7 @@ type GoogleModelArmor struct {
 }
 
 // PromptguardRequest defines the prompt guards to apply to requests sent by the client.
-// +kubebuilder:validation:ExactlyOneOf=regex;webhook;openAIModeration;bedrockGuardrails;googleModelArmor
+// +kubebuilder:validation:ExactlyOneOf=regex;webhook;headerRedaction;openAIModeration;bedrockGuardrails;googleModelArmor
 type PromptguardRequest struct {
 	// A custom response message to return to the client. If not specified, defaults to
 	// `The request was rejected due to inappropriate content`.
@@ -221,6 +249,12 @@ type PromptguardRequest struct {
 	// Configure a webhook to forward requests to for prompt guarding.
 	// +optional
 	Webhook *Webhook `json:"webhook,omitempty"`
+
+	// `headerRedaction` performs symmetric, in-process redaction driven by
+	// HTTP headers on the client request. See [HeaderRedaction](#fieldheaderredaction)
+	// for details. No external service required.
+	// +optional
+	HeaderRedaction *HeaderRedaction `json:"headerRedaction,omitempty"`
 
 	// `openAIModeration` passes prompt data through the OpenAI Moderations
 	// endpoint.
@@ -239,7 +273,7 @@ type PromptguardRequest struct {
 }
 
 // PromptguardResponse configures the response that the prompt guard applies to responses returned by the LLM provider.
-// +kubebuilder:validation:ExactlyOneOf=regex;webhook;bedrockGuardrails;googleModelArmor
+// +kubebuilder:validation:ExactlyOneOf=regex;webhook;headerRedaction;bedrockGuardrails;googleModelArmor
 type PromptguardResponse struct {
 	// A custom response message to return to the client. If not specified, defaults to
 	// `The response was rejected due to inappropriate content`.
@@ -253,6 +287,12 @@ type PromptguardResponse struct {
 	// Configure a webhook to forward responses to for prompt guarding.
 	// +optional
 	Webhook *Webhook `json:"webhook,omitempty"`
+
+	// `headerRedaction` un-redacts tokens in the response using the same
+	// client request header values used at the request phase. See
+	// [HeaderRedaction](#fieldheaderredaction).
+	// +optional
+	HeaderRedaction *HeaderRedaction `json:"headerRedaction,omitempty"`
 
 	// `bedrockGuardrails` configures AWS Bedrock Guardrails for prompt
 	// guarding.

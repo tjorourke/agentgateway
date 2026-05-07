@@ -942,6 +942,7 @@ impl AIProvider {
 		rate_limit: LLMResponsePolicies,
 		log: AsyncLog<llm::LLMInfo>,
 		include_completion_in_log: bool,
+		client_headers: ::http::HeaderMap,
 		resp: Response,
 	) -> Result<Response, AIError> {
 		// Non-success responses are plain JSON, not event-stream data.
@@ -1029,6 +1030,7 @@ impl AIProvider {
 				&client,
 				resp.as_mut(),
 				&parts.headers,
+				&client_headers,
 				&rate_limit.prompt_guard,
 			)
 			.await
